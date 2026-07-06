@@ -100,6 +100,45 @@
                         <dd class="col-sm-8">{{ $user->doctorProfile->license_number ?? '—' }}</dd>
                         <dt class="col-sm-4">Bio</dt>
                         <dd class="col-sm-8">{{ $user->doctorProfile->bio ?? '—' }}</dd>
+                        <dt class="col-sm-4">Medical License</dt>
+                        <dd class="col-sm-8">
+                            @if($user->doctorProfile->medical_license)
+                                <a href="{{ asset('storage/' . $user->doctorProfile->medical_license) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                <a href="{{ asset('storage/' . $user->doctorProfile->medical_license) }}" download class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-download"></i> Download
+                                </a>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </dd>
+                        <dt class="col-sm-4">PMDC Certificate</dt>
+                        <dd class="col-sm-8">
+                            @if($user->doctorProfile->pmdc_cert)
+                                <a href="{{ asset('storage/' . $user->doctorProfile->pmdc_cert) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                <a href="{{ asset('storage/' . $user->doctorProfile->pmdc_cert) }}" download class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-download"></i> Download
+                                </a>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </dd>
+                        <dt class="col-sm-4">CV/Resume</dt>
+                        <dd class="col-sm-8">
+                            @if($user->doctorProfile->cv)
+                                <a href="{{ asset('storage/' . $user->doctorProfile->cv) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                <a href="{{ asset('storage/' . $user->doctorProfile->cv) }}" download class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-download"></i> Download
+                                </a>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </dd>
                     </dl>
                 </div>
             </div>

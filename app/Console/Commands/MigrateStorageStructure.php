@@ -38,6 +38,11 @@ class MigrateStorageStructure extends Command
             'doctor_photos' => [
                 ['table' => 'doctor_profiles', 'column' => 'profile_photo'],
             ],
+            'doctor-documents' => [
+                ['table' => 'doctor_profiles', 'column' => 'medical_license'],
+                ['table' => 'doctor_profiles', 'column' => 'pmdc_cert'],
+                ['table' => 'doctor_profiles', 'column' => 'cv'],
+            ],
             'blog_covers' => [
                 ['table' => 'blog_posts', 'column' => 'cover_image'],
             ],

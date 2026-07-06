@@ -14,6 +14,9 @@ class DoctorProfile extends Model
         'hospital',
         'pmdc_number',
         'profile_photo',
+        'medical_license',
+        'pmdc_cert',
+        'cv',
     ];
 
     public function user()

@@ -89,9 +89,17 @@ class OnboardingService implements IOnboardingService
         if (!isset($data['license_number']) && isset($data['pmdc_number'])) {
             $data['license_number'] = $data['pmdc_number'];
         }
+        if (isset($data['medical_license'])) {
+            $data['medical_license'] = $this->fileUpload->save($data['medical_license'], 'doctor-documents');
+        }
+        if (isset($data['pmdc_cert'])) {
+            $data['pmdc_cert'] = $this->fileUpload->save($data['pmdc_cert'], 'doctor-documents');
+        }
+        if (isset($data['cv'])) {
+            $data['cv'] = $this->fileUpload->save($data['cv'], 'doctor-documents');
+        }
         unset($data['full_name'], $data['email'], $data['phone'], $data['city'],
-              $data['years_experience'], $data['clinic_address'],
-              $data['medical_license'], $data['pmdc_cert'], $data['cv']);
+              $data['years_experience'], $data['clinic_address']);
         return DoctorProfile::create(array_merge($data, ['user_id' => $userId]));
     }
 
