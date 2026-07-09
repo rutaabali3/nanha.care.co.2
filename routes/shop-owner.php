@@ -8,7 +8,7 @@ use App\Http\Controllers\Dashboard\ShopOwner\EarningsController;
 use App\Http\Controllers\Dashboard\ShopOwner\ProfileController;
 use App\Http\Controllers\Dashboard\ShopOwner\ReviewsController;
 
-Route::prefix('/dashboard/shop-owner')->middleware(['auth', 'role:shop_owner'])->group(function () {
+Route::prefix('/dashboard/shop-owner')->middleware(['auth', 'role:shop_owner', 'onboarded'])->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('shop-owner.dashboard');
 

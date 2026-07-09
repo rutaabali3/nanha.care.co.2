@@ -108,7 +108,8 @@
                 @csrf
                 <div class="col-md-4">
                     <label for="amount" class="form-label">Amount ($) — Min $500</label>
-                    <input type="number" name="amount" id="amount" class="form-control" step="0.01" min="500" max="{{ $earnings->sum('total_fee') }}" required>
+                    <input type="number" name="amount" id="amount" class="form-control @error('amount') is-invalid @enderror" value="{{ old('amount') }}" step="0.01" min="500" max="{{ $earnings->sum('total_fee') }}" required>
+                    @error('amount') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
                 <div class="col-md-12">
                     <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i> Submit Payout Request</button>
@@ -118,11 +119,8 @@
     </div>
 @endsection
 
-@push('styles')
-<script src="{{ asset('js/chart.js') }}"></script>
-@endpush
-
 @push('scripts')
+<script src="{{ asset('js/chart.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         fetch('{{ route('babysitter.earnings.chart-data') }}')

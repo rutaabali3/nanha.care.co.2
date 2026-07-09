@@ -20,6 +20,17 @@
                 <p class="mb-0"><strong>Duration:</strong> {{ $booking->duration_hours }} hours</p>
             </div>
 
+            @if ($errors->any())
+                <div class="alert alert-danger mb-4">
+                    <strong>Please fix the following errors:</strong>
+                    <ul class="mb-0 mt-1">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <form method="POST" action="{{ route('parent.bookings.review', $booking->id) }}">
                 @csrf
 
@@ -30,14 +41,14 @@
                             <i class="bi bi-star" data-value="{{ $i }}" role="button"></i>
                         @endfor
                     </div>
-                    <input type="hidden" name="rating" id="rating" value="0" required>
+                    <input type="hidden" name="rating" id="rating" value="{{ old('rating', 0) }}" required>
                     @error('rating') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="mb-3">
                     <label for="comment" class="form-label fw-semibold">Comment</label>
-                    <textarea name="comment" id="comment" class="form-control" rows="4" placeholder="Share your experience..." required></textarea>
-                    @error('comment') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                    <textarea name="comment" id="comment" class="form-control @error('comment') is-invalid @enderror" rows="4" placeholder="Share your experience..." required>{{ old('comment') }}</textarea>
+                    @error('comment') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
                 <button type="submit" class="btn btn-primary">Submit Review</button>
@@ -51,6 +62,17 @@
     document.addEventListener('DOMContentLoaded', function() {
         var stars = document.querySelectorAll('.star-input .bi-star, .star-input .bi-star-fill');
         var ratingInput = document.getElementById('rating');
+
+        // Set initial stars based on old value
+        var initialValue = parseInt(ratingInput.value);
+        if (initialValue > 0) {
+            stars.forEach(function(s) {
+                var starValue = parseInt(s.getAttribute('data-value'));
+                if (starValue <= initialValue) {
+                    s.className = 'bi bi-star-fill';
+                }
+            });
+        }
 
         stars.forEach(function(star) {
             star.addEventListener('click', function() {

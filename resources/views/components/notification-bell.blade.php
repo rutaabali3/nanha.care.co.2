@@ -3,7 +3,9 @@
     $unreadCount = \Illuminate\Support\Facades\Cache::remember("notifications.unread.$userId", 60, function () use ($userId) {
         return \App\Models\Notification::where('user_id', $userId)->where('is_read', false)->count();
     });
-    $recentNotifications = \App\Models\Notification::where('user_id', $userId)->where('is_read', false)->latest()->take(10)->get();
+    $recentNotifications = \Illuminate\Support\Facades\Cache::remember("notifications.recent.$userId", 60, function () use ($userId) {
+        return \App\Models\Notification::where('user_id', $userId)->where('is_read', false)->latest()->take(10)->get();
+    });
 @endphp
 <div class="dropdown">
     <button class="btn position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background: transparent; border: none;">

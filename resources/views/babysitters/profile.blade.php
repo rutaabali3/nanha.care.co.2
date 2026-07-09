@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@push('styles')
+    <link href="{{ asset('css/babysitters.css') }}" rel="stylesheet">
+@endpush
+
 @section('content')
 <div class="container py-5">
     <a href="{{ route('babysitters.index') }}" class="btn btn-outline-secondary mb-4">
@@ -118,14 +122,38 @@
 </div>
 
 <div class="d-md-none fixed-bottom p-3" style="background-color: var(--white); border-top: 1px solid #dee2e6;">
+    @auth
+        @if(!auth()->user()->hasCompletedOnboarding())
+        <a href="{{ auth()->user()->onboardingRoute() }}" class="btn btn-primary w-100 py-2" style="font-weight: 600;">
+            Complete registration
+        </a>
+        @else
+        <a href="#" class="btn btn-primary w-100 py-2" style="font-weight: 600;">
+            <i class="bi bi-calendar-check me-1"></i> Book Now
+        </a>
+        @endif
+    @else
     <a href="#" class="btn btn-primary w-100 py-2" style="font-weight: 600;">
         <i class="bi bi-calendar-check me-1"></i> Book Now
     </a>
+    @endauth
 </div>
 
 <div class="d-none d-md-block text-center mt-3 mb-5">
+    @auth
+        @if(!auth()->user()->hasCompletedOnboarding())
+        <a href="{{ auth()->user()->onboardingRoute() }}" class="btn btn-primary btn-lg px-5 py-2" style="font-weight: 600;">
+            Complete registration
+        </a>
+        @else
+        <a href="#" class="btn btn-primary btn-lg px-5 py-2" style="font-weight: 600;">
+            <i class="bi bi-calendar-check me-1"></i> Book Now
+        </a>
+        @endif
+    @else
     <a href="#" class="btn btn-primary btn-lg px-5 py-2" style="font-weight: 600;">
         <i class="bi bi-calendar-check me-1"></i> Book Now
     </a>
+    @endauth
 </div>
 @endsection

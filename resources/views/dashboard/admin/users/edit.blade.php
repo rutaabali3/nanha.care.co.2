@@ -12,8 +12,9 @@
 
 <div class="card border-0 shadow-sm" style="max-width: 600px;">
     <div class="card-body">
-        <form method="POST" action="{{ route('admin.users.edit', $user->id) }}">
+        <form method="POST" action="{{ route('admin.users.update', $user->id) }}">
             @csrf
+            @method('PUT')
             <div class="mb-3">
                 <label class="form-label">Name</label>
                 <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"

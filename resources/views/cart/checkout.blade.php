@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@push('styles')
+    <link href="{{ asset('css/cart.css') }}" rel="stylesheet">
+@endpush
+
 @section('content')
 <div class="container py-4">
     <h2 class="fw-bold mb-4 text-navy"><i class="bi bi-credit-card"></i> Checkout</h2>

@@ -25,9 +25,11 @@
                 @guest
                     <a href="{{ route('auth.login') }}" class="btn btn-sm px-3 text-on-gradient" style="border: 1px solid rgba(255,255,255,0.6); background: transparent;">Login</a>
                 @else
+                    @if(auth()->user()->hasCompletedOnboarding())
                     <a href="{{ route('cart.index') }}" class="btn position-relative btn-sm px-2 text-on-gradient" style="background: none; border: none;">
                         <i class="bi bi-cart3 fs-5"></i>
                     </a>
+                    @endif
                     <div class="dropdown">
                         <button class="btn dropdown-toggle d-flex align-items-center gap-2 text-on-gradient" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);">
                             <img src="{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&background=87CEEB&color=2D3436' }}" class="rounded-circle" width="28" height="28" alt="Avatar">
@@ -47,7 +49,11 @@
                             };
                         @endphp
                         <ul class="dropdown-menu dropdown-menu-end">
+                            @if(auth()->user()->hasCompletedOnboarding())
                             <li><a class="dropdown-item" href="{{ route($dashboardRoute) }}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+                            @else
+                            <li><a class="dropdown-item" href="{{ auth()->user()->onboardingRoute() }}"><i class="bi bi-person-check me-2"></i>Complete Registration</a></li>
+                            @endif
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form method="POST" action="{{ route('auth.logout') }}">

@@ -36,20 +36,20 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->bind(IBabysitterService::class, BabysitterService::class);
-        $this->app->bind(IBookingService::class, BookingService::class);
-        $this->app->bind(IMarketplaceService::class, MarketplaceService::class);
-        $this->app->bind(IProductService::class, ProductService::class);
-        $this->app->bind(IOrderService::class, OrderService::class);
-        $this->app->bind(IBlogService::class, BlogService::class);
-        $this->app->bind(INotificationService::class, NotificationService::class);
-        $this->app->bind(IEmailService::class, EmailService::class);
-        $this->app->bind(IFileUploadService::class, FileUploadService::class);
-        $this->app->bind(ISupportTicketService::class, SupportTicketService::class);
-        $this->app->bind(IModerationService::class, ModerationService::class);
-        $this->app->bind(IDashboardService::class, DashboardService::class);
-        $this->app->bind(IPaymentService::class, PaymentService::class);
-        $this->app->bind(IOnboardingService::class, OnboardingService::class);
+        $this->app->singleton(IBabysitterService::class, BabysitterService::class);
+        $this->app->singleton(IBookingService::class, BookingService::class);
+        $this->app->singleton(IMarketplaceService::class, MarketplaceService::class);
+        $this->app->singleton(IProductService::class, ProductService::class);
+        $this->app->singleton(IOrderService::class, OrderService::class);
+        $this->app->singleton(IBlogService::class, BlogService::class);
+        $this->app->singleton(INotificationService::class, NotificationService::class);
+        $this->app->singleton(IEmailService::class, EmailService::class);
+        $this->app->singleton(IFileUploadService::class, FileUploadService::class);
+        $this->app->singleton(ISupportTicketService::class, SupportTicketService::class);
+        $this->app->singleton(IModerationService::class, ModerationService::class);
+        $this->app->singleton(IDashboardService::class, DashboardService::class);
+        $this->app->singleton(IPaymentService::class, PaymentService::class);
+        $this->app->singleton(IOnboardingService::class, OnboardingService::class);
     }
 
     public function boot(): void

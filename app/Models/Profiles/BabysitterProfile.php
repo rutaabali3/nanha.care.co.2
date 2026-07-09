@@ -29,6 +29,19 @@ class BabysitterProfile extends Model
         'verified_status' => VerifiedStatus::class,
     ];
 
+    protected static function booted()
+    {
+        static::saved(function () {
+            \Illuminate\Support\Facades\Cache::forget('babysitter_cities');
+            \Illuminate\Support\Facades\Cache::forget('babysitter_specializations');
+        });
+
+        static::deleted(function () {
+            \Illuminate\Support\Facades\Cache::forget('babysitter_cities');
+            \Illuminate\Support\Facades\Cache::forget('babysitter_specializations');
+        });
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');

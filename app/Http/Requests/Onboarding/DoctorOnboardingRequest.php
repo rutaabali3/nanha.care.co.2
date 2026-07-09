@@ -18,7 +18,7 @@ class DoctorOnboardingRequest extends FormRequest
             'email' => 'required|email|max:255',
             'phone' => 'required|string|max:20',
             'city' => 'required|string|max:100',
-            'profile_photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'pmdc_number' => 'required|string|max:50',
             'specialization' => 'required|string|max:100',
             'clinic_name' => 'required|string|max:200',

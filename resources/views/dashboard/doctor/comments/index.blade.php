@@ -93,17 +93,29 @@
         <div class="modal-content">
             <form method="POST" action="">
                 @csrf
+                <input type="hidden" name="reply_comment_id" id="reply_comment_id" value="{{ old('reply_comment_id') }}">
+                <input type="hidden" name="reply_comment_content" id="reply_comment_content" value="{{ old('reply_comment_content') }}">
                 <div class="modal-header">
                     <h5 class="modal-title">Reply to Comment</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    @if(old('reply_comment_id') && $errors->any())
+                        <div class="alert alert-danger py-2">
+                            <ul class="mb-0 small">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                     <div class="mb-3 p-3 bg-light rounded">
                         <p class="mb-0 fw-semibold" id="modalCommentContent"></p>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Your Reply</label>
-                        <textarea name="reply" class="form-control" rows="4" required></textarea>
+                        <textarea name="reply" class="form-control @error('reply') is-invalid @enderror" rows="4" required>{{ old('reply') }}</textarea>
+                        @error('reply') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -124,11 +136,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const replyModal = document.getElementById('replyModal');
     replyModal.addEventListener('show.bs.modal', function (event) {
         const button = event.relatedTarget;
+        if (!button) return; // Guard for manual bootstrap show calls
         const commentId = button.getAttribute('data-comment-id');
         const commentContent = button.getAttribute('data-comment-content');
         const existingReply = button.getAttribute('data-existing-reply');
         const form = this.querySelector('form');
         form.action = '{{ route('doctor.comments.reply', 'REPLACE_ID') }}'.replace('REPLACE_ID', commentId);
+        document.getElementById('reply_comment_id').value = commentId;
+        document.getElementById('reply_comment_content').value = commentContent;
         document.getElementById('modalCommentContent').textContent = commentContent;
         if (existingReply) {
             form.querySelector('textarea[name="reply"]').value = existingReply;
@@ -136,6 +151,15 @@ document.addEventListener('DOMContentLoaded', function () {
             form.querySelector('textarea[name="reply"]').value = '';
         }
     });
+
+    // Reopen modal if validation failed
+    @if(old('reply_comment_id'))
+        const form = replyModal.querySelector('form');
+        form.action = '{{ route('doctor.comments.reply', 'REPLACE_ID') }}'.replace('REPLACE_ID', '{{ old('reply_comment_id') }}');
+        document.getElementById('modalCommentContent').textContent = {!! json_encode(old('reply_comment_content')) !!};
+        const modal = new bootstrap.Modal(replyModal);
+        modal.show();
+    @endif
 });
 </script>
 @endpush

@@ -66,14 +66,27 @@
                             <div class="modal-dialog">
                                 <form method="POST" action="{{ route('babysitter.bookings.decline', $booking->id) }}">
                                     @csrf
+                                    <input type="hidden" name="decline_booking_id" value="{{ $booking->id }}">
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <h5 class="modal-title">Decline Booking</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body">
+                                            @if(old('decline_booking_id') == $booking->id && $errors->any())
+                                                <div class="alert alert-danger py-2">
+                                                    <ul class="mb-0 small">
+                                                        @foreach($errors->all() as $error)
+                                                            <li>{{ $error }}</li>
+                                                        @endforeach
+                                                    </ul>
+                                                </div>
+                                            @endif
                                             <label for="reason" class="form-label">Reason for declining</label>
-                                            <textarea name="reason" id="reason" class="form-control" rows="3" required></textarea>
+                                            <textarea name="reason" id="reason" class="form-control @if(old('decline_booking_id') == $booking->id) @error('reason') is-invalid @enderror @endif" rows="3" required>{{ old('decline_booking_id') == $booking->id ? old('reason') : '' }}</textarea>
+                                            @if(old('decline_booking_id') == $booking->id)
+                                                @error('reason') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                            @endif
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -104,5 +117,15 @@
                 </div>
             </div>
         @endforelse
-    </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        @if(old('decline_booking_id'))
+            var declineModal = new bootstrap.Modal('#declineModal' + '{{ old('decline_booking_id') }}');
+            declineModal.show();
+        @endif
+    });
+</script>
+@endpush

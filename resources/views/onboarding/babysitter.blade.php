@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@push('styles')
+    <link href="{{ asset('css/onboarding.css') }}" rel="stylesheet">
+@endpush
+
 @section('content')
 <div class="container py-5">
     <div class="row justify-content-center">

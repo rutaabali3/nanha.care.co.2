@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@push('styles')
+    <link href="{{ asset('css/shop.css') }}" rel="stylesheet">
+@endpush
+
 @section('content')
 <div class="container-fluid bg-gradient-hero text-on-gradient">
     <div class="container py-5">

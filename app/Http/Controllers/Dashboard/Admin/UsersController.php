@@ -82,6 +82,23 @@ class UsersController extends Controller
         return view('dashboard.admin.users.edit', compact('user'));
     }
 
+    public function update(Request $request, $id)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|max:255',
+            'phone' => 'nullable|string|max:20',
+            'city' => 'nullable|string|max:100',
+            'status' => 'required|in:active,suspended,banned',
+        ]);
+
+        $user = User::findOrFail($id);
+        $user->update($data);
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User updated successfully.');
+    }
+
     public function suspend($id)
     {
         $user = User::findOrFail($id);

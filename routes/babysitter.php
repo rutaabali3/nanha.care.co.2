@@ -8,7 +8,7 @@ use App\Http\Controllers\Dashboard\Babysitter\EarningsController;
 use App\Http\Controllers\Dashboard\Babysitter\ReviewsController;
 use App\Http\Controllers\Dashboard\Babysitter\NotificationsController;
 
-Route::prefix('/dashboard/babysitter')->middleware(['auth', 'role:babysitter'])->group(function () {
+Route::prefix('/dashboard/babysitter')->middleware(['auth', 'role:babysitter', 'onboarded'])->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('babysitter.dashboard');
 

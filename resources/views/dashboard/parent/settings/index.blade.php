@@ -9,9 +9,7 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab">Profile</button>
         </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="password-tab" data-bs-toggle="tab" data-bs-target="#password" type="button" role="tab">Password</button>
-        </li>
+
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notifications" type="button" role="tab">Notifications</button>
         </li>
@@ -70,38 +68,6 @@
             </div>
         </div>
 
-        {{-- Password --}}
-        <div class="tab-pane fade" id="password" role="tabpanel">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <h6 class="mb-0 fw-semibold">Change Password</h6>
-                </div>
-                <div class="card-body">
-                    <form method="POST" action="{{ route('parent.settings.password') }}">
-                        @csrf
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label for="current_password" class="form-label">Current Password</label>
-                                <input type="password" name="current_password" id="current_password" class="form-control" required>
-                                @error('current_password') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
-                            </div>
-                            <div class="col-md-6">
-                                <label for="new_password" class="form-label">New Password</label>
-                                <input type="password" name="new_password" id="new_password" class="form-control" required>
-                                @error('new_password') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
-                            </div>
-                            <div class="col-md-6">
-                                <label for="new_password_confirmation" class="form-label">Confirm New Password</label>
-                                <input type="password" name="new_password_confirmation" id="new_password_confirmation" class="form-control" required>
-                            </div>
-                            <div class="col-12">
-                                <button type="submit" class="btn btn-primary">Change Password</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
 
         {{-- Notifications --}}
         <div class="tab-pane fade" id="notifications" role="tabpanel">

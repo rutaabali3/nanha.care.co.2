@@ -2,8 +2,8 @@
 
 @section('title', 'Reports & Analytics')
 
-@push('styles')
-<script src="{{ asset('js/chart-4.4.4.umd.min.js') }}"></script>
+@push('scripts')
+<script src="{{ asset('js/chart.js') }}"></script>
 @endpush
 
 @section('content')

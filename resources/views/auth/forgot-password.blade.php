@@ -11,6 +11,12 @@
                 <h4 class="fw-bold text-dark">Forgot Password?</h4>
                 <p class="text-muted small">Enter your email and we'll send you a reset link</p>
             </div>
+
+            @if (session('status'))
+                <div class="alert alert-success text-center small" role="alert">
+                    {{ session('status') }}
+                </div>
+            @endif
             <form method="POST" action="{{ route('auth.forgot-password') }}">
                 @csrf
                 <div class="mb-4">

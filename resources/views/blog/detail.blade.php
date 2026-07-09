@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@push('styles')
+    <link href="{{ asset('css/blog.css') }}" rel="stylesheet">
+@endpush
+
 @section('content')
 <div class="container py-4">
     <nav aria-label="breadcrumb">
@@ -108,21 +112,28 @@
 
         @if(auth()->check())
             @if(auth()->user()->hasRole('parent'))
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <h6 class="fw-bold mb-3 text-navy">Leave a Comment</h6>
-                    <form method="POST" action="{{ route('blog.comment', $post->id) }}">
-                        @csrf
-                        <div class="mb-3">
-                            <textarea name="content" class="form-control @error('content') is-invalid @enderror" rows="4" placeholder="Share your thoughts..." required></textarea>
-                            @error('content')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <button type="submit" class="btn btn-primary">Post Comment</button>
-                    </form>
+                @if(auth()->user()->hasCompletedOnboarding())
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3 text-navy">Leave a Comment</h6>
+                        <form method="POST" action="{{ route('blog.comment', $post->id) }}">
+                            @csrf
+                            <div class="mb-3">
+                                <textarea name="content" class="form-control @error('content') is-invalid @enderror" rows="4" placeholder="Share your thoughts..." required></textarea>
+                                @error('content')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <button type="submit" class="btn btn-primary">Post Comment</button>
+                        </form>
+                    </div>
                 </div>
-            </div>
+                @else
+                <div class="card shadow-sm border-0 text-center p-4">
+                    <p class="mb-3">Please complete your registration to leave a comment.</p>
+                    <a href="{{ auth()->user()->onboardingRoute() }}" class="btn btn-primary">Complete registration</a>
+                </div>
+                @endif
             @else
             <div class="alert alert-info d-flex align-items-center gap-2">
                 <i class="bi bi-info-circle"></i> Only parents can leave comments.

@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@push('styles')
+    <link href="{{ asset('css/onboarding.css') }}" rel="stylesheet">
+@endpush
+
 @section('content')
 <div class="container py-5">
     <div class="row justify-content-center">
@@ -9,7 +13,19 @@
                     <h2 class="fw-bold mb-1" style="color: var(--dark-text);">Join as a Parent</h2>
                     <p class="text-muted mb-4">Find trusted care for your little ones</p>
 
-                    <form method="POST" action="{{ route('onboarding.parent') }}" enctype="multipart/form-data">
+                    @if($errors->any())
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong><i class="bi bi-exclamation-triangle-fill me-2"></i>Please fix the following errors:</strong>
+                        <ul class="mb-0 mt-1">
+                            @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    @endif
+
+                    <form method="POST" action="{{ route('onboarding.parent') }}" enctype="multipart/form-data" novalidate>
                         @csrf
 
                         <div id="step-indicators" class="d-flex justify-content-between mb-4">
@@ -32,40 +48,45 @@
 
                             <div class="mb-3">
                                 <label for="full_name" class="form-label fw-medium">Full Name</label>
-                                <input type="text" class="form-control" id="full_name" name="full_name" required>
+                                <input type="text" class="form-control @error('full_name') is-invalid @enderror" id="full_name" name="full_name" value="{{ old('full_name') }}" required>
+                                @error('full_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
                             <div class="row g-3 mb-3">
                                 <div class="col-md-6">
                                     <label for="email" class="form-label fw-medium">Email</label>
-                                    <input type="email" class="form-control" id="email" name="email" required>
+                                    <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" required>
+                                    @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                                 <div class="col-md-6">
                                     <label for="phone" class="form-label fw-medium">Phone</label>
-                                    <input type="text" class="form-control" id="phone" name="phone" required>
+                                    <input type="text" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" value="{{ old('phone') }}" required>
+                                    @error('phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                             </div>
 
                             <div class="mb-3">
                                 <label for="city" class="form-label fw-medium">City</label>
-                                <select class="form-select" id="city" name="city" required>
-                                    <option value="" disabled selected>Select city</option>
-                                    <option value="Karachi">Karachi</option>
-                                    <option value="Lahore">Lahore</option>
-                                    <option value="Islamabad">Islamabad</option>
-                                    <option value="Rawalpindi">Rawalpindi</option>
-                                    <option value="Faisalabad">Faisalabad</option>
-                                    <option value="Multan">Multan</option>
-                                    <option value="Peshawar">Peshawar</option>
-                                    <option value="Quetta">Quetta</option>
-                                    <option value="Sialkot">Sialkot</option>
-                                    <option value="Gujranwala">Gujranwala</option>
+                                <select class="form-select @error('city') is-invalid @enderror" id="city" name="city" required>
+                                    <option value="" disabled {{ old('city') ? '' : 'selected' }}>Select city</option>
+                                    <option value="Karachi" {{ old('city') == 'Karachi' ? 'selected' : '' }}>Karachi</option>
+                                    <option value="Lahore" {{ old('city') == 'Lahore' ? 'selected' : '' }}>Lahore</option>
+                                    <option value="Islamabad" {{ old('city') == 'Islamabad' ? 'selected' : '' }}>Islamabad</option>
+                                    <option value="Rawalpindi" {{ old('city') == 'Rawalpindi' ? 'selected' : '' }}>Rawalpindi</option>
+                                    <option value="Faisalabad" {{ old('city') == 'Faisalabad' ? 'selected' : '' }}>Faisalabad</option>
+                                    <option value="Multan" {{ old('city') == 'Multan' ? 'selected' : '' }}>Multan</option>
+                                    <option value="Peshawar" {{ old('city') == 'Peshawar' ? 'selected' : '' }}>Peshawar</option>
+                                    <option value="Quetta" {{ old('city') == 'Quetta' ? 'selected' : '' }}>Quetta</option>
+                                    <option value="Sialkot" {{ old('city') == 'Sialkot' ? 'selected' : '' }}>Sialkot</option>
+                                    <option value="Gujranwala" {{ old('city') == 'Gujranwala' ? 'selected' : '' }}>Gujranwala</option>
                                 </select>
+                                @error('city') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
                             <div class="mb-3">
                                 <label for="profile_photo" class="form-label fw-medium">Profile Photo</label>
-                                <input type="file" class="form-control" id="profile_photo" name="profile_photo" accept="image/*" onchange="previewImage(this, 'profile-preview')">
+                                <input type="file" class="form-control @error('profile_photo') is-invalid @enderror" id="profile_photo" name="profile_photo" accept="image/*" onchange="previewImage(this, 'profile-preview')">
+                                @error('profile_photo') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 <div class="mt-2">
                                     <img id="profile-preview" src="#" alt="Preview" class="rounded" style="max-width: 150px; max-height: 150px; display: none;">
                                 </div>
@@ -83,13 +104,14 @@
 
                             <div class="mb-3">
                                 <label for="num_children" class="form-label fw-medium">Number of Children</label>
-                                <select class="form-select" id="num_children" name="num_children" required>
-                                    <option value="" disabled selected>Select</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4+</option>
+                                <select class="form-select @error('num_children') is-invalid @enderror" id="num_children" name="num_children" required>
+                                    <option value="" disabled {{ old('num_children') ? '' : 'selected' }}>Select</option>
+                                    <option value="1" {{ old('num_children') == '1' ? 'selected' : '' }}>1</option>
+                                    <option value="2" {{ old('num_children') == '2' ? 'selected' : '' }}>2</option>
+                                    <option value="3" {{ old('num_children') == '3' ? 'selected' : '' }}>3</option>
+                                    <option value="4" {{ old('num_children') == '4' ? 'selected' : '' }}>4+</option>
                                 </select>
+                                @error('num_children') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
                             <div class="mb-3">
@@ -98,32 +120,37 @@
                                     @php $ages = ['0-1 year', '1-3 years', '3-5 years', '5-10 years', '10+']; @endphp
                                     @foreach($ages as $age)
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="children_ages[]" value="{{ $age }}" id="age-{{ Str::slug($age) }}">
+                                        <input class="form-check-input @error('children_ages') is-invalid @enderror" type="checkbox" name="children_ages[]" value="{{ $age }}" id="age-{{ Str::slug($age) }}" {{ is_array(old('children_ages')) && in_array($age, old('children_ages')) ? 'checked' : '' }}>
                                         <label class="form-check-label" for="age-{{ Str::slug($age) }}">{{ $age }}</label>
                                     </div>
                                     @endforeach
                                 </div>
+                                @error('children_ages') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                             </div>
 
                             <div class="row g-3 mb-3">
                                 <div class="col-md-6">
                                     <label for="emergency_contact_name" class="form-label fw-medium">Emergency Contact Name</label>
-                                    <input type="text" class="form-control" id="emergency_contact_name" name="emergency_contact_name" required>
+                                    <input type="text" class="form-control @error('emergency_contact_name') is-invalid @enderror" id="emergency_contact_name" name="emergency_contact_name" value="{{ old('emergency_contact_name') }}" required>
+                                    @error('emergency_contact_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                                 <div class="col-md-6">
                                     <label for="emergency_contact_phone" class="form-label fw-medium">Emergency Contact Phone</label>
-                                    <input type="text" class="form-control" id="emergency_contact_phone" name="emergency_contact_phone" required>
+                                    <input type="text" class="form-control @error('emergency_contact_phone') is-invalid @enderror" id="emergency_contact_phone" name="emergency_contact_phone" value="{{ old('emergency_contact_phone') }}" required>
+                                    @error('emergency_contact_phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                             </div>
 
                             <div class="mb-3">
                                 <label for="address" class="form-label fw-medium">Address</label>
-                                <textarea class="form-control" id="address" name="address" rows="2" required></textarea>
+                                <textarea class="form-control @error('address') is-invalid @enderror" id="address" name="address" rows="2" required>{{ old('address') }}</textarea>
+                                @error('address') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
                             <div class="mb-3">
                                 <label for="special_requirements" class="form-label fw-medium">Special Requirements <span class="text-muted">(optional)</span></label>
-                                <textarea class="form-control" id="special_requirements" name="special_requirements" rows="3" placeholder="Any special needs or requirements for your children..."></textarea>
+                                <textarea class="form-control @error('special_requirements') is-invalid @enderror" id="special_requirements" name="special_requirements" rows="3" placeholder="Any special needs or requirements for your children...">{{ old('special_requirements') }}</textarea>
+                                @error('special_requirements') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
                             <div class="d-flex justify-content-between mt-4">
@@ -174,5 +201,12 @@ function goToStep(step) {
         bar.style.width = '100%'; bar.setAttribute('aria-valuenow', '100');
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    var hasStep2Errors = {{ $errors->hasAny(['num_children', 'children_ages', 'emergency_contact_name', 'emergency_contact_phone', 'address', 'special_requirements']) ? 'true' : 'false' }};
+    if (hasStep2Errors) {
+        goToStep(2);
+    }
+});
 </script>
 @endpush

@@ -83,3 +83,18 @@ document.querySelectorAll('input[type=file][data-preview]').forEach(input => {
     }
   })
 })
+
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.toggle-password');
+  if (!btn) return;
+  const input = btn.previousElementSibling;
+  if (input && input.tagName === 'INPUT') {
+    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+    input.setAttribute('type', type);
+    const icon = btn.querySelector('i');
+    if (icon) {
+      icon.classList.toggle('bi-eye');
+      icon.classList.toggle('bi-eye-slash');
+    }
+  }
+});

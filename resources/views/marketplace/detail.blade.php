@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@push('styles')
+    <link href="{{ asset('css/marketplace.css') }}" rel="stylesheet">
+@endpush
+
 @section('content')
 <div class="container py-4">
     <nav aria-label="breadcrumb">
@@ -78,26 +82,34 @@
 
             @auth
                 @if(auth()->user()->hasRole('parent'))
-                <div class="d-flex align-items-center gap-3 mb-4">
-                    <div class="input-group" style="max-width: 140px;">
-                        <form method="POST" action="{{ route('cart.update') }}" class="d-flex align-items-center" id="quantity-form">
+                    @if(auth()->user()->hasCompletedOnboarding())
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="input-group" style="max-width: 140px;">
+                            <form method="POST" action="{{ route('cart.update') }}" class="d-flex align-items-center" id="quantity-form">
+                                @csrf
+                                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('qty').stepDown(); document.getElementById('quantity-form').submit();">-</button>
+                                <input type="number" name="qty" id="qty" class="form-control text-center" value="1" min="1">
+                                <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('qty').stepUp(); document.getElementById('quantity-form').submit();">+</button>
+                            </form>
+                        </div>
+
+                        <form method="POST" action="{{ route('cart.add') }}">
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
-                            <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('qty').stepDown(); document.getElementById('quantity-form').submit();">-</button>
-                            <input type="number" name="qty" id="qty" class="form-control text-center" value="1" min="1">
-                            <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('qty').stepUp(); document.getElementById('quantity-form').submit();">+</button>
+                            <input type="hidden" name="qty" value="1">
+                            <button type="submit" class="btn btn-primary btn-lg px-4">
+                                <i class="bi bi-cart-plus"></i> Add to Cart
+                            </button>
                         </form>
                     </div>
-
-                    <form method="POST" action="{{ route('cart.add') }}">
-                        @csrf
-                        <input type="hidden" name="product_id" value="{{ $product->id }}">
-                        <input type="hidden" name="qty" value="1">
-                        <button type="submit" class="btn btn-primary btn-lg px-4">
-                            <i class="bi bi-cart-plus"></i> Add to Cart
-                        </button>
-                    </form>
-                </div>
+                    @else
+                    <div class="mb-4">
+                        <a href="{{ auth()->user()->onboardingRoute() }}" class="btn btn-primary btn-lg px-4">
+                            Complete registration
+                        </a>
+                    </div>
+                    @endif
                 @else
                 <div class="mb-4 p-3 rounded" style="background-color: #fff3cd; border: 1px solid #ffc107;">
                     <i class="bi bi-exclamation-triangle me-1"></i> Only parents can purchase products.

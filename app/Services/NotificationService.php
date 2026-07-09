@@ -6,6 +6,7 @@ use App\Contracts\INotificationService;
 use App\Models\System\Notification;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class NotificationService implements INotificationService
 {
@@ -48,5 +49,10 @@ class NotificationService implements INotificationService
             'updated_at' => now(),
         ]);
         Notification::insert($notifications->toArray());
+
+        foreach ($userIds as $userId) {
+            Cache::forget("notifications.unread.{$userId}");
+            Cache::forget("notifications.recent.{$userId}");
+        }
     }
 }

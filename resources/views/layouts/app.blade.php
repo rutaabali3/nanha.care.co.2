@@ -9,16 +9,6 @@
     <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/bootstrap-icons.css') }}" rel="stylesheet">
     <link href="{{ asset('css/site.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/home.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/babysitters.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/cart.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/contact.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/onboarding.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/marketplace.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/shop.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/blog.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/errors.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/notifications.css') }}" rel="stylesheet">
     @stack('styles')
 </head>
 <body>

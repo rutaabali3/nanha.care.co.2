@@ -7,7 +7,7 @@ use App\Http\Controllers\Dashboard\Doctor\CommentsController;
 use App\Http\Controllers\Dashboard\Doctor\AnalyticsController;
 use App\Http\Controllers\Dashboard\Doctor\ProfileController;
 
-Route::prefix('/dashboard/doctor')->middleware(['auth', 'role:doctor'])->group(function () {
+Route::prefix('/dashboard/doctor')->middleware(['auth', 'role:doctor', 'onboarded'])->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('doctor.dashboard');
 

@@ -7,6 +7,7 @@ use App\Contracts\IFileUploadService;
 use App\Models\Marketplace\Shop;
 use App\Models\Profiles\BabysitterProfile;
 use App\Models\Profiles\DoctorProfile;
+use App\Models\Profiles\ParentProfile;
 use App\Models\User;
 use Illuminate\Support\Str;
 
@@ -18,10 +19,28 @@ class OnboardingService implements IOnboardingService
 
     public function saveBabysitter(string $userId, array $data): BabysitterProfile
     {
+        $user = User::findOrFail($userId);
+        $userUpdate = [];
+
+        if (isset($data['full_name'])) {
+            $userUpdate['name'] = $data['full_name'];
+        }
+        if (isset($data['phone'])) {
+            $userUpdate['phone'] = $data['phone'];
+        }
+        if (isset($data['city'])) {
+            $userUpdate['city'] = $data['city'];
+        }
         if (isset($data['profile_photo'])) {
             $data['avatar'] = $this->fileUpload->save($data['profile_photo'], 'avatars');
+            $userUpdate['avatar'] = $data['avatar'];
             unset($data['profile_photo']);
         }
+
+        if (!empty($userUpdate)) {
+            $user->update($userUpdate);
+        }
+
         if (isset($data['experience'])) {
             $data['bio'] = $data['experience'];
             unset($data['experience']);
@@ -33,6 +52,26 @@ class OnboardingService implements IOnboardingService
 
     public function saveShopOwner(string $userId, array $data): Shop
     {
+        $user = User::findOrFail($userId);
+        $userUpdate = [];
+
+        if (isset($data['full_name'])) {
+            $userUpdate['name'] = $data['full_name'];
+        }
+        if (isset($data['phone'])) {
+            $userUpdate['phone'] = $data['phone'];
+        }
+        if (isset($data['city'])) {
+            $userUpdate['city'] = $data['city'];
+        }
+        if (isset($data['profile_photo'])) {
+            $userUpdate['avatar'] = $this->fileUpload->save($data['profile_photo'], 'avatars');
+        }
+
+        if (!empty($userUpdate)) {
+            $user->update($userUpdate);
+        }
+
         if (isset($data['shop_logo'])) {
             $data['logo'] = $this->fileUpload->save($data['shop_logo'], 'logos');
             unset($data['shop_logo']);
@@ -53,6 +92,9 @@ class OnboardingService implements IOnboardingService
         if (isset($data['shop_address'])) {
             $data['contact_info'] = $data['shop_address'];
             unset($data['shop_address']);
+        }
+        if (isset($data['categories'])) {
+            $data['category'] = $data['categories'];
         }
         unset($data['full_name'], $data['email'], $data['phone'], $data['city'], $data['profile_photo'],
               $data['business_license'], $data['categories']);
@@ -124,5 +166,17 @@ class OnboardingService implements IOnboardingService
         if (!empty($updateData)) {
             $user->update($updateData);
         }
+
+        ParentProfile::updateOrCreate(
+            ['user_id' => $userId],
+            [
+                'num_children' => $data['num_children'] ?? 1,
+                'children_ages' => $data['children_ages'] ?? null,
+                'emergency_contact_name' => $data['emergency_contact_name'] ?? '',
+                'emergency_contact_phone' => $data['emergency_contact_phone'] ?? '',
+                'address' => $data['address'] ?? '',
+                'special_requirements' => $data['special_requirements'] ?? null,
+            ]
+        );
     }
 }

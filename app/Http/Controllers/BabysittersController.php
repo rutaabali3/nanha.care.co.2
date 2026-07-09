@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Contracts\IBabysitterService;
 use App\Models\Profiles\BabysitterProfile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class BabysittersController extends Controller
 {
@@ -17,23 +18,28 @@ class BabysittersController extends Controller
         $filters = $request->only(['city', 'min_rate', 'max_rate', 'experience_years', 'specialization', 'availability_day']);
         $babysitters = $this->babysitterService->getAll($filters);
 
-        $cities = BabysitterProfile::query()
-            ->join('users', 'users.id', '=', 'babysitter_profiles.user_id')
-            ->whereNotNull('users.city')
-            ->select('users.city')
-            ->distinct()
-            ->pluck('city')
-            ->sort()
-            ->values();
+        $cities = Cache::remember('babysitter_cities', 3600, function () {
+            return BabysitterProfile::query()
+                ->join('users', 'users.id', '=', 'babysitter_profiles.user_id')
+                ->whereNotNull('users.city')
+                ->select('users.city')
+                ->distinct()
+                ->pluck('city')
+                ->sort()
+                ->values()
+                ->toArray();
+        });
 
-        $specializations = BabysitterProfile::query()
-            ->whereNotNull('specializations')
-            ->get()
-            ->pluck('specializations')
-            ->flatten()
-            ->unique()
-            ->sort()
-            ->values();
+        $specializations = Cache::remember('babysitter_specializations', 3600, function () {
+            return BabysitterProfile::query()
+                ->whereNotNull('specializations')
+                ->pluck('specializations')
+                ->flatten()
+                ->unique()
+                ->sort()
+                ->values()
+                ->toArray();
+        });
 
         return view('babysitters.index', compact('babysitters', 'filters', 'cities', 'specializations'));
     }

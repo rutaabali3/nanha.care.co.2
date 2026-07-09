@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'bancheck' => BanCheckMiddleware::class,
             'rolearea' => RoleAreaGuardMiddleware::class,
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'onboarded' => \App\Http\Middleware\EnsureOnboardingCompleted::class,
         ]);
 
         $middleware->append([

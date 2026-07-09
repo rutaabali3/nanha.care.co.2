@@ -26,14 +26,14 @@ Route::get('/shop/{slug}', [ShopController::class, 'public'])->name('shop.show')
 
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [BlogController::class, 'detail'])->name('blog.detail');
-Route::post('/blog/{id}/comment', [BlogController::class, 'addComment'])->name('blog.comment')->middleware('auth');
+Route::post('/blog/{id}/comment', [BlogController::class, 'addComment'])->name('blog.comment')->middleware(['auth', 'onboarded']);
 
-Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
-Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
-Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
-Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout')->middleware(['auth', 'role:parent']);
-Route::post('/checkout', [CartController::class, 'placeOrder'])->middleware(['auth', 'role:parent']);
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index')->middleware('onboarded');
+Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add')->middleware('onboarded');
+Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove')->middleware('onboarded');
+Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update')->middleware('onboarded');
+Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout')->middleware(['auth', 'role:parent', 'onboarded']);
+Route::post('/checkout', [CartController::class, 'placeOrder'])->middleware(['auth', 'role:parent', 'onboarded']);
 
 Route::get('/auth/login', [AuthController::class, 'loginForm'])->name('auth.login');
 Route::post('/auth/login', [AuthController::class, 'login']);
@@ -44,8 +44,8 @@ Route::get('/auth/confirm-email', [AuthController::class, 'checkEmail'])->name('
 Route::get('/auth/check-email', [AuthController::class, 'checkEmail'])->name('auth.check-email');
 Route::get('/auth/forgot-password', [AuthController::class, 'forgotPasswordForm'])->name('auth.forgot-password');
 Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
-Route::get('/auth/reset-password', [AuthController::class, 'resetPasswordForm'])->name('auth.reset-password');
-Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
+Route::get('/auth/reset-password/{token}', [AuthController::class, 'resetPasswordForm'])->name('password.reset');
+Route::post('/auth/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 Route::get('/auth/suspended', [AuthController::class, 'suspended'])->name('auth.suspended');
 
 Route::get('email/verify/{id}/{hash}', [AuthController::class, 'confirmEmail'])
@@ -56,6 +56,9 @@ Route::prefix('email')->middleware('auth')->group(function () {
     Route::get('verify', [AuthController::class, 'checkEmail'])->name('verification.notice');
     Route::post('resend', [AuthController::class, 'resendVerification'])->name('verification.resend');
 });
+
+Route::get('/auth/choose-role', [AuthController::class, 'chooseRoleForm'])->name('auth.choose-role')->middleware('auth');
+Route::post('/auth/choose-role', [AuthController::class, 'chooseRole'])->middleware('auth');
 
 Route::get('/onboarding/babysitter', [OnboardingController::class, 'babysitter'])->name('onboarding.babysitter')->middleware('auth');
 Route::post('/onboarding/babysitter', [OnboardingController::class, 'saveBabysitter'])->middleware('auth');
@@ -81,3 +84,4 @@ require __DIR__.'/parent.php';
 require __DIR__.'/shop-owner.php';
 require __DIR__.'/doctor.php';
 require __DIR__.'/support.php';
+

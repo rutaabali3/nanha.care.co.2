@@ -9,7 +9,7 @@ use App\Http\Controllers\Dashboard\Parent\SavedBabysittersController;
 use App\Http\Controllers\Dashboard\Parent\BookmarksController;
 use App\Http\Controllers\Dashboard\Parent\SettingsController;
 
-Route::prefix('/dashboard/parent')->middleware(['auth', 'role:parent'])->group(function () {
+Route::prefix('/dashboard/parent')->middleware(['auth', 'role:parent', 'onboarded'])->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('parent.dashboard');
 

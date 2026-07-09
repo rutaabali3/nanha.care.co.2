@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@push('styles')
+    <link href="{{ asset('css/onboarding.css') }}" rel="stylesheet">
+@endpush
+
 @section('content')
 <div class="container py-5">
     <div class="row justify-content-center">
@@ -11,6 +15,17 @@
 
                     <form method="POST" action="{{ route('onboarding.shop-owner') }}" enctype="multipart/form-data">
                         @csrf
+
+                        @if ($errors->any())
+                            <div class="alert alert-danger mb-4">
+                                <strong>Please fix the following errors:</strong>
+                                <ul class="mb-0 mt-1">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
 
                         <div id="step-indicators" class="d-flex justify-content-between mb-4">
                             <div class="text-center flex-fill">
@@ -32,34 +47,34 @@
 
                             <div class="mb-3">
                                 <label for="full_name" class="form-label fw-medium">Full Name</label>
-                                <input type="text" class="form-control" id="full_name" name="full_name" required>
+                                <input type="text" class="form-control @error('full_name') is-invalid @enderror" id="full_name" name="full_name" value="{{ old('full_name') }}" required>
                             </div>
 
                             <div class="row g-3 mb-3">
                                 <div class="col-md-6">
                                     <label for="email" class="form-label fw-medium">Email</label>
-                                    <input type="email" class="form-control" id="email" name="email" required>
+                                    <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="phone" class="form-label fw-medium">Phone</label>
-                                    <input type="text" class="form-control" id="phone" name="phone" required>
+                                    <input type="text" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" value="{{ old('phone') }}" required>
                                 </div>
                             </div>
 
                             <div class="mb-3">
                                 <label for="city" class="form-label fw-medium">City</label>
-                                <select class="form-select" id="city" name="city" required>
-                                    <option value="" disabled selected>Select city</option>
-                                    <option value="Karachi">Karachi</option>
-                                    <option value="Lahore">Lahore</option>
-                                    <option value="Islamabad">Islamabad</option>
-                                    <option value="Rawalpindi">Rawalpindi</option>
-                                    <option value="Faisalabad">Faisalabad</option>
-                                    <option value="Multan">Multan</option>
-                                    <option value="Peshawar">Peshawar</option>
-                                    <option value="Quetta">Quetta</option>
-                                    <option value="Sialkot">Sialkot</option>
-                                    <option value="Gujranwala">Gujranwala</option>
+                                <select class="form-select @error('city') is-invalid @enderror" id="city" name="city" required>
+                                    <option value="" disabled {{ old('city') ? '' : 'selected' }}>Select city</option>
+                                    <option value="Karachi" {{ old('city') == 'Karachi' ? 'selected' : '' }}>Karachi</option>
+                                    <option value="Lahore" {{ old('city') == 'Lahore' ? 'selected' : '' }}>Lahore</option>
+                                    <option value="Islamabad" {{ old('city') == 'Islamabad' ? 'selected' : '' }}>Islamabad</option>
+                                    <option value="Rawalpindi" {{ old('city') == 'Rawalpindi' ? 'selected' : '' }}>Rawalpindi</option>
+                                    <option value="Faisalabad" {{ old('city') == 'Faisalabad' ? 'selected' : '' }}>Faisalabad</option>
+                                    <option value="Multan" {{ old('city') == 'Multan' ? 'selected' : '' }}>Multan</option>
+                                    <option value="Peshawar" {{ old('city') == 'Peshawar' ? 'selected' : '' }}>Peshawar</option>
+                                    <option value="Quetta" {{ old('city') == 'Quetta' ? 'selected' : '' }}>Quetta</option>
+                                    <option value="Sialkot" {{ old('city') == 'Sialkot' ? 'selected' : '' }}>Sialkot</option>
+                                    <option value="Gujranwala" {{ old('city') == 'Gujranwala' ? 'selected' : '' }}>Gujranwala</option>
                                 </select>
                             </div>
 
@@ -83,17 +98,17 @@
 
                             <div class="mb-3">
                                 <label for="shop_name" class="form-label fw-medium">Shop Name</label>
-                                <input type="text" class="form-control" id="shop_name" name="shop_name" required>
+                                <input type="text" class="form-control @error('shop_name') is-invalid @enderror" id="shop_name" name="shop_name" value="{{ old('shop_name') }}" required>
                             </div>
 
                             <div class="mb-3">
                                 <label for="shop_description" class="form-label fw-medium">Shop Description</label>
-                                <textarea class="form-control" id="shop_description" name="shop_description" rows="3" required></textarea>
+                                <textarea class="form-control @error('shop_description') is-invalid @enderror" id="shop_description" name="shop_description" rows="3" required>{{ old('shop_description') }}</textarea>
                             </div>
 
                             <div class="mb-3">
                                 <label for="shop_address" class="form-label fw-medium">Shop Address</label>
-                                <textarea class="form-control" id="shop_address" name="shop_address" rows="2" required></textarea>
+                                <textarea class="form-control @error('shop_address') is-invalid @enderror" id="shop_address" name="shop_address" rows="2" required>{{ old('shop_address') }}</textarea>
                             </div>
 
                             <div class="mb-3">
@@ -124,11 +139,10 @@
                             <div class="mb-3">
                                 <label class="form-label fw-medium">Categories</label>
                                 <div class="d-flex flex-wrap gap-3">
-                                    @php $cats = ['Diapers', 'Formula', 'Toys', 'Clothing', 'Gear', 'Health & Safety']; @endphp
-                                    @foreach($cats as $cat)
+                                    @foreach(\App\Enums\ShopCategory::labels() as $val => $label)
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="categories[]" value="{{ $cat }}" id="cat-{{ Str::slug($cat) }}">
-                                        <label class="form-check-label" for="cat-{{ Str::slug($cat) }}">{{ $cat }}</label>
+                                        <input class="form-check-input" type="checkbox" name="categories[]" value="{{ $val }}" id="cat-{{ $val }}">
+                                        <label class="form-check-label" for="cat-{{ $val }}">{{ $label }}</label>
                                     </div>
                                     @endforeach
                                 </div>
@@ -182,5 +196,18 @@ function goToStep(step) {
         bar.style.width = '100%'; bar.setAttribute('aria-valuenow', '100');
     }
 }
+
+// On page load, jump to the correct step if there are validation errors
+document.addEventListener('DOMContentLoaded', function () {
+    @if ($errors->any())
+        const step2Fields = ['shop_name', 'shop_description', 'shop_address', 'shop_logo', 'shop_banner', 'business_license', 'categories'];
+        const hasStep2Error = step2Fields.some(field => document.querySelector('[name="' + field + '"]')?.classList.contains('is-invalid'));
+        const step1Fields = ['full_name', 'email', 'phone', 'city', 'profile_photo'];
+        const hasStep1Error = step1Fields.some(field => document.querySelector('[name="' + field + '"]')?.classList.contains('is-invalid'));
+        if (hasStep2Error && !hasStep1Error) {
+            goToStep(2);
+        }
+    @endif
+});
 </script>
 @endpush

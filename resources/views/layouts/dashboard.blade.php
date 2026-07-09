@@ -79,6 +79,20 @@
             @include('partials._toast')
         @endif
 
+        @if ($errors->any())
+            <div class="container-fluid px-4 pt-3">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong><i class="bi bi-exclamation-triangle-fill me-2"></i>Please fix the following errors:</strong>
+                    <ul class="mb-0 mt-1">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        @endif
+
         @include('partials._confirm-modal')
 
         <div class="content-area">

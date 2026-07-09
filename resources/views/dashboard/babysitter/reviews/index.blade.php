@@ -43,18 +43,31 @@
                         <div class="modal-dialog">
                             <form method="POST" action="{{ route('babysitter.reviews.reply', $review->id) }}">
                                 @csrf
+                                <input type="hidden" name="reply_review_id" value="{{ $review->id }}">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h5 class="modal-title">Reply to Review</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
                                     <div class="modal-body">
+                                        @if(old('reply_review_id') == $review->id && $errors->any())
+                                            <div class="alert alert-danger py-2">
+                                                <ul class="mb-0 small">
+                                                    @foreach($errors->all() as $error)
+                                                        <li>{{ $error }}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        @endif
                                         <div class="mb-3">
                                             @include('partials._star-rating', ['rating' => $review->rating])
                                             <p class="mt-1 mb-0 text-muted">{{ $review->comment }}</p>
                                         </div>
                                         <label for="reply" class="form-label">Your Reply</label>
-                                        <textarea name="reply" id="reply" class="form-control" rows="4" required></textarea>
+                                        <textarea name="reply" id="reply" class="form-control @if(old('reply_review_id') == $review->id) @error('reply') is-invalid @enderror @endif" rows="4" required>{{ old('reply_review_id') == $review->id ? old('reply') : '' }}</textarea>
+                                        @if(old('reply_review_id') == $review->id)
+                                            @error('reply') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                        @endif
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -79,3 +92,14 @@
         @endif
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        @if(old('reply_review_id'))
+            var replyModal = new bootstrap.Modal('#replyModal' + '{{ old('reply_review_id') }}');
+            replyModal.show();
+        @endif
+    });
+</script>
+@endpush

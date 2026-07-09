@@ -19,7 +19,6 @@ class RegisterRequest extends FormRequest
             'password' => 'required|string|min:8|confirmed',
             'phone' => 'nullable|regex:/^03[0-9]{9}$/',
             'city' => 'nullable|string|in:Karachi,Lahore,Islamabad,Rawalpindi,Faisalabad,Multan,Peshawar,Quetta',
-            'role' => 'required|in:parent,babysitter,shop_owner,doctor',
         ];
     }
 }

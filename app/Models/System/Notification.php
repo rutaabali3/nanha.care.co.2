@@ -24,6 +24,19 @@ class Notification extends Model
         'is_read' => 'boolean',
     ];
 
+    protected static function booted()
+    {
+        static::saved(function ($notification) {
+            \Illuminate\Support\Facades\Cache::forget("notifications.unread.{$notification->user_id}");
+            \Illuminate\Support\Facades\Cache::forget("notifications.recent.{$notification->user_id}");
+        });
+
+        static::deleted(function ($notification) {
+            \Illuminate\Support\Facades\Cache::forget("notifications.unread.{$notification->user_id}");
+            \Illuminate\Support\Facades\Cache::forget("notifications.recent.{$notification->user_id}");
+        });
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

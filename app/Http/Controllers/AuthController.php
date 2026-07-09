@@ -52,6 +52,10 @@ class AuthController extends Controller
             return redirect()->route('auth.check-email')->with('info', 'Please verify your email before logging in.');
         }
 
+        if (!$user->getRoleNames()->first()) {
+            return redirect()->route('auth.choose-role');
+        }
+
         return redirect($this->dashboardRoute());
     }
 
@@ -75,7 +79,6 @@ class AuthController extends Controller
             'status' => UserStatus::Active,
         ]);
 
-        $user->assignRole($request->role);
         $user->sendEmailVerificationNotification();
 
         return redirect()->route('auth.check-email')->with('success', 'Account created. Check your email.');
@@ -104,7 +107,12 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        $role = str_replace('_', '-', $user->getRoleNames()->first());
+        $roleName = $user->getRoleNames()->first();
+        if (!$roleName) {
+            return redirect()->route('auth.choose-role');
+        }
+
+        $role = str_replace('_', '-', $roleName);
 
         return redirect()->route('onboarding.' . $role);
     }
@@ -135,9 +143,9 @@ class AuthController extends Controller
         return back()->with('status', 'Password reset link sent to your email.');
     }
 
-    public function resetPasswordForm(Request $request)
+    public function resetPasswordForm(Request $request, $token)
     {
-        return view('auth.reset-password', ['token' => $request->token]);
+        return view('auth.reset-password', ['token' => $token, 'email' => $request->email]);
     }
 
     public function resetPassword(Request $request)
@@ -158,7 +166,7 @@ class AuthController extends Controller
         );
 
         if ($status === Password::PASSWORD_RESET) {
-            return redirect()->route('login')->with('success', 'Password reset successfully.');
+            return redirect()->route('auth.login')->with('success', 'Password reset successfully.');
         }
 
         return back()->withErrors(['email' => [__($status)]]);
@@ -183,5 +191,32 @@ class AuthController extends Controller
             'support_agent' => '/dashboard/support',
             default => '/',
         };
+    }
+
+    public function chooseRoleForm()
+    {
+        if (auth()->user()->getRoleNames()->first()) {
+            return redirect($this->dashboardRoute());
+        }
+
+        return view('auth.choose-role');
+    }
+
+    public function chooseRole(Request $request)
+    {
+        $request->validate([
+            'role' => 'required|in:parent,babysitter,shop_owner,doctor',
+        ]);
+
+        $user = auth()->user();
+        if ($user->getRoleNames()->first()) {
+            return redirect($this->dashboardRoute());
+        }
+
+        $user->assignRole($request->role);
+        
+        $roleSlug = str_replace('_', '-', $request->role);
+
+        return redirect()->route('onboarding.' . $roleSlug);
     }
 }

@@ -19,6 +19,7 @@ Route::prefix('/dashboard/admin')->middleware(['auth', 'role:admin'])->group(fun
     Route::post('/users', [UsersController::class, 'store'])->name('admin.users.store');
     Route::get('/users/{id}', [UsersController::class, 'details'])->name('admin.users.details');
     Route::get('/users/{id}/edit', [UsersController::class, 'edit'])->name('admin.users.edit');
+    Route::put('/users/{id}', [UsersController::class, 'update'])->name('admin.users.update');
     Route::post('/users/{id}/suspend', [UsersController::class, 'suspend'])->name('admin.users.suspend');
     Route::post('/users/{id}/ban', [UsersController::class, 'ban'])->name('admin.users.ban');
     Route::post('/users/{id}/restore', [UsersController::class, 'restore'])->name('admin.users.restore');
