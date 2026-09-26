@@ -138,38 +138,58 @@ class DashboardService implements IDashboardService
     {
         return Cache::remember("dashboard.shop_owner.{$userId}", 60, function () use ($userId) {
             $shop = Shop::where('user_id', $userId)->first();
-            $shopId = $shop?->id;
-            $shopId ??= null;
+            if (!$shop) {
+                return [
+                    'shop' => null,
+                    'total_products' => 0,
+                    'total_orders' => 0,
+                    'pending_orders' => 0,
+                    'total_revenue' => 0.0,
+                    'avg_rating' => 0,
+                    'total_reviews' => 0,
+                    'recent_orders' => collect(),
+                ];
+            }
+
+            // Bolt Optimization: Retrieve product IDs for the shop upfront.
+            // 1. Avoids repeating nested subquery joins (`whereHas('items.product', ...)`) on products table in every query.
+            // 2. Early-returns if the shop has no products, skipping all order and review queries.
+            // 3. Combines review aggregate stats (`avg` and `count`) into a single DB query.
+            $productIds = Product::where('shop_id', $shop->id)->pluck('id');
+            $totalProducts = $productIds->count();
+
+            if ($totalProducts === 0) {
+                return [
+                    'shop' => $shop,
+                    'total_products' => 0,
+                    'total_orders' => 0,
+                    'pending_orders' => 0,
+                    'total_revenue' => 0.0,
+                    'avg_rating' => 0,
+                    'total_reviews' => 0,
+                    'recent_orders' => collect(),
+                ];
+            }
+
+            // Single aggregated query for reviews
+            $reviewStats = ProductReview::whereIn('product_id', $productIds)
+                ->selectRaw('AVG(rating) as avg_rating, COUNT(*) as total_reviews')
+                ->first();
+
+            $orderFilter = fn($query) => $query->whereHas('items', fn($q) => $q->whereIn('product_id', $productIds));
 
             return [
                 'shop' => $shop,
-                'total_products' => $shopId ? Product::where('shop_id', $shopId)->count() : 0,
-                'total_orders' => $shopId ? Order::whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))->count() : 0,
-                'pending_orders' => $shopId
-                    ? Order::whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))
-                        ->where('status', 'pending')
-                        ->count()
-                    : 0,
-                'total_revenue' => $shopId
-                    ? (float) Order::whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))
-                        ->where('status', 'delivered')
-                        ->sum('total')
-                    : 0,
-                'avg_rating' => $shopId
-                    ? ProductReview::whereHas('product', fn($q) => $q->where('shop_id', $shopId))
-                        ->avg('rating')
-                    : 0,
-                'total_reviews' => $shopId
-                    ? ProductReview::whereHas('product', fn($q) => $q->where('shop_id', $shopId))
-                        ->count()
-                    : 0,
-                'recent_orders' => $shopId
-                    ? Order::with('parent', 'items.product')
-                        ->whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))
-                        ->orderByDesc('created_at')
-                        ->take(5)
-                        ->get()
-                    : collect(),
+                'total_products' => $totalProducts,
+                'total_orders' => $orderFilter(Order::query())->count(),
+                'pending_orders' => $orderFilter(Order::query())->where('status', 'pending')->count(),
+                'total_revenue' => (float) $orderFilter(Order::query())->where('status', 'delivered')->sum('total'),
+                'avg_rating' => $reviewStats?->avg_rating ? (float) $reviewStats->avg_rating : 0,
+                'total_reviews' => (int) ($reviewStats?->total_reviews ?? 0),
+                'recent_orders' => $orderFilter(Order::with('parent', 'items.product'))
+                    ->orderByDesc('created_at')
+                    ->take(5)
+                    ->get(),
             ];
         });
     }
