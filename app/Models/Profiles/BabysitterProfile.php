@@ -49,7 +49,20 @@ class BabysitterProfile extends Model
 
     public function reviews()
     {
-        return $this->hasMany(BabysitterReview::class, 'babysitter_id');
+        return $this->hasMany(BabysitterReview::class, 'babysitter_id', 'user_id');
+    }
+
+    /**
+     * Get the pre-aggregated or lazily calculated average rating.
+     * Uses reviews_avg_rating populated by Eloquent's withAvg() subquery when present.
+     */
+    public function getAvgRatingAttribute(): float
+    {
+        if (array_key_exists('reviews_avg_rating', $this->attributes)) {
+            return round((float) ($this->attributes['reviews_avg_rating'] ?? 0), 1);
+        }
+
+        return round((float) ($this->reviews()->avg('rating') ?? 0), 1);
     }
 
     public function verificationBadges()
