@@ -11,7 +11,10 @@ class BabysitterService implements IBabysitterService
 {
     public function getFeatured(): Collection
     {
+        // PERFORMANCE: Use withAvg('reviews', 'rating') to compute average ratings via SQL subquery
+        // instead of loading review models, eliminating unnecessary memory allocation.
         return BabysitterProfile::with('user')
+            ->withAvg('reviews', 'rating')
             ->where('verified_status', \App\Enums\VerifiedStatus::Verified)
             ->inRandomOrder()
             ->take(6)
@@ -20,7 +23,9 @@ class BabysitterService implements IBabysitterService
 
     public function getAll(array $filters): LengthAwarePaginator
     {
-        $query = BabysitterProfile::with('user', 'reviews');
+        // PERFORMANCE: Replace eager loading all review model instances (with('reviews')) with withAvg('reviews', 'rating').
+        // This calculates the average rating directly in DB via subquery, saving memory hydration per listed babysitter.
+        $query = BabysitterProfile::with('user')->withAvg('reviews', 'rating');
 
         if (!empty($filters['city'])) {
             $query->whereHas('user', fn($q) => $q->where('city', $filters['city']));
