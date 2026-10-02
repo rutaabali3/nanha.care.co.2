@@ -89,14 +89,24 @@ class DashboardService implements IDashboardService
     public function getBabysitterOverview(string $userId): array
     {
         return Cache::remember("dashboard.babysitter.{$userId}", 60, function () use ($userId) {
+            // Bolt Performance Optimization:
+            // Combine multiple aggregate queries on the `bookings` table into a single query using DB::raw expression.
+            // This reduces DB round-trips from 4 to 1 for booking statistics, saving significant query overhead and database execution time.
+            $stats = Booking::where('babysitter_id', $userId)
+                ->selectRaw('
+                    COUNT(*) as total_bookings,
+                    COUNT(CASE WHEN status = ? THEN 1 END) as completed_bookings,
+                    COUNT(CASE WHEN status = ? THEN 1 END) as pending_bookings,
+                    COALESCE(SUM(CASE WHEN status = ? THEN total_fee ELSE 0 END), 0) as total_earned
+                ', ['completed', 'pending', 'completed'])
+                ->first();
+
             return [
-                'total_bookings' => Booking::where('babysitter_id', $userId)->count(),
-                'completed_bookings' => Booking::where('babysitter_id', $userId)->where('status', 'completed')->count(),
-                'pending_bookings' => Booking::where('babysitter_id', $userId)->where('status', 'pending')->count(),
+                'total_bookings' => (int) ($stats->total_bookings ?? 0),
+                'completed_bookings' => (int) ($stats->completed_bookings ?? 0),
+                'pending_bookings' => (int) ($stats->pending_bookings ?? 0),
                 'average_rating' => BabysitterReview::where('babysitter_id', $userId)->avg('rating'),
-                'total_earned' => Booking::where('babysitter_id', $userId)
-                    ->where('status', 'completed')
-                    ->sum('total_fee'),
+                'total_earned' => (float) ($stats->total_earned ?? 0),
                 'recent_bookings' => Booking::with('parent', 'bookingChildren.child')
                     ->where('babysitter_id', $userId)
                     ->orderByDesc('created_at')
