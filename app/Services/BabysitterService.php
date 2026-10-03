@@ -20,7 +20,10 @@ class BabysitterService implements IBabysitterService
 
     public function getAll(array $filters): LengthAwarePaginator
     {
-        $query = BabysitterProfile::with('user', 'reviews');
+        // Optimization: Replace `with('reviews')` with `withAvg('reviews', 'rating')`.
+        // Loading full review models into memory for all paginated babysitters causes severe memory and DB overhead.
+        // `withAvg` computes average rating via SQL subquery directly in database.
+        $query = BabysitterProfile::with('user')->withAvg('reviews', 'rating');
 
         if (!empty($filters['city'])) {
             $query->whereHas('user', fn($q) => $q->where('city', $filters['city']));
@@ -37,6 +40,14 @@ class BabysitterService implements IBabysitterService
         if (!empty($filters['verified'])) {
             $query->where('verified_status', \App\Enums\VerifiedStatus::Verified);
         }
+
+        $sort = $filters['sort'] ?? 'newest';
+        match ($sort) {
+            'rate_asc' => $query->orderBy('hourly_rate', 'asc'),
+            'rate_desc' => $query->orderBy('hourly_rate', 'desc'),
+            'rating' => $query->orderByDesc('reviews_avg_rating'),
+            default => $query->orderByDesc('created_at'),
+        };
 
         return $query->paginate(12);
     }
