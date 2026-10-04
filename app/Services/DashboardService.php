@@ -139,33 +139,39 @@ class DashboardService implements IDashboardService
         return Cache::remember("dashboard.shop_owner.{$userId}", 60, function () use ($userId) {
             $shop = Shop::where('user_id', $userId)->first();
             $shopId = $shop?->id;
-            $shopId ??= null;
+
+            // Performance Optimization:
+            // Fetch product IDs owned by this shop once into memory to eliminate redundant correlated
+            // double-EXISTS subqueries (`whereHas('items.product')`) across multiple dashboard metric queries.
+            // This simplifies the SQL query structure from subqueries to direct `whereIn` conditions.
+            $productIds = $shopId ? Product::where('shop_id', $shopId)->pluck('id') : collect();
+            $hasProducts = $productIds->isNotEmpty();
 
             return [
                 'shop' => $shop,
-                'total_products' => $shopId ? Product::where('shop_id', $shopId)->count() : 0,
-                'total_orders' => $shopId ? Order::whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))->count() : 0,
-                'pending_orders' => $shopId
-                    ? Order::whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))
+                'total_products' => $productIds->count(),
+                'total_orders' => $hasProducts
+                    ? Order::whereHas('items', fn($q) => $q->whereIn('product_id', $productIds))->count()
+                    : 0,
+                'pending_orders' => $hasProducts
+                    ? Order::whereHas('items', fn($q) => $q->whereIn('product_id', $productIds))
                         ->where('status', 'pending')
                         ->count()
                     : 0,
-                'total_revenue' => $shopId
-                    ? (float) Order::whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))
+                'total_revenue' => $hasProducts
+                    ? (float) Order::whereHas('items', fn($q) => $q->whereIn('product_id', $productIds))
                         ->where('status', 'delivered')
                         ->sum('total')
                     : 0,
-                'avg_rating' => $shopId
-                    ? ProductReview::whereHas('product', fn($q) => $q->where('shop_id', $shopId))
-                        ->avg('rating')
+                'avg_rating' => $hasProducts
+                    ? (float) (ProductReview::whereIn('product_id', $productIds)->avg('rating') ?? 0)
                     : 0,
-                'total_reviews' => $shopId
-                    ? ProductReview::whereHas('product', fn($q) => $q->where('shop_id', $shopId))
-                        ->count()
+                'total_reviews' => $hasProducts
+                    ? ProductReview::whereIn('product_id', $productIds)->count()
                     : 0,
-                'recent_orders' => $shopId
+                'recent_orders' => $hasProducts
                     ? Order::with('parent', 'items.product')
-                        ->whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))
+                        ->whereHas('items', fn($q) => $q->whereIn('product_id', $productIds))
                         ->orderByDesc('created_at')
                         ->take(5)
                         ->get()
