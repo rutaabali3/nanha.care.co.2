@@ -1,0 +1,3 @@
+## 2026-10-05 - Moderation Queue and Published Content N+1 Eager Loading
+**Learning:** In `ModerationService`, polymorphism and dynamic class instantiation in `getQueue()` and `getPublished()` meant models were retrieved without eager-loading their associated owner/author models (`shop.owner`, `doctor`, `user`). When rendered in the moderation dashboard views, accessing these relations triggered N+1 database queries ($1+2N$ queries per list).
+**Action:** When querying polymorphic or mixed model queues, match on the model type and apply appropriate eager loads (`with(...)`) before calling `get()` or `paginate()`.
