@@ -32,7 +32,18 @@ class ModerationService implements IModerationService
         $types = $type ? (isset($this->typeMap[$type]) ? [$type => $this->typeMap[$type]] : []) : $this->typeMap;
 
         foreach ($types as $key => $class) {
-            $items = $class::where('status', ContentStatus::UnderReview)->get()->map(
+            $query = $class::where('status', ContentStatus::UnderReview);
+
+            // Optimization: Eager-load author/owner relationships to prevent N+1 queries when displaying the moderation queue.
+            // Performance impact: Reduces query count from 1+2N queries per item list down to 1 query per content type.
+            match ($key) {
+                'product' => $query->with('shop.owner'),
+                'blog_post' => $query->with('doctor'),
+                'babysitter_profile' => $query->with('user'),
+                default => null,
+            };
+
+            $items = $query->get()->map(
                 fn($item) => ['type' => $key, 'item' => $item]
             );
             $result = $result->concat($items);
@@ -93,9 +104,21 @@ class ModerationService implements IModerationService
 
     public function getPublished(?string $type = null): LengthAwarePaginator
     {
-        $class = $this->typeMap[$type] ?? BlogPost::class;
-        return $class::where('status', ContentStatus::Published)
-            ->orderByDesc('created_at')
+        $selectedType = $type && isset($this->typeMap[$type]) ? $type : 'blog_post';
+        $class = $this->typeMap[$selectedType];
+
+        $query = $class::where('status', ContentStatus::Published);
+
+        // Optimization: Eager-load relationships to avoid N+1 queries when listing published content.
+        // Performance impact: Reduces DB query overhead from 1+N queries to 1-2 queries per page.
+        match ($selectedType) {
+            'product' => $query->with('shop.owner'),
+            'blog_post' => $query->with('doctor'),
+            'babysitter_profile' => $query->with('user'),
+            default => null,
+        };
+
+        return $query->orderByDesc('created_at')
             ->paginate(15);
     }
 
