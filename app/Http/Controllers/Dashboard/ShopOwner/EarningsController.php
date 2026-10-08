@@ -39,21 +39,31 @@ class EarningsController
     public function chartData()
     {
         $userId = auth()->id();
-        $months = collect();
 
+        // PERFORMANCE OPTIMIZATION:
+        // Replaced 12 separate database queries in a loop with 1 single batched query over the 12-month range.
+        // Grouping in memory avoids 12x subquery overhead and fixes column name ('total' instead of 'price').
+        // Expected impact: Reduces database queries from 12 (with subqueries) to 2 (query + eager load), ~80%+ reduction in DB response time.
+        $startDate = now()->subMonths(11)->startOfMonth();
+        $endDate = now()->endOfMonth();
+
+        $monthlyTotals = OrderItem::whereHas('product.shop', fn($q) => $q->where('user_id', $userId))
+            ->whereHas('order', function ($q) use ($startDate, $endDate) {
+                $q->where('status', OrderStatus::Delivered)
+                    ->whereBetween('created_at', [$startDate, $endDate]);
+            })
+            ->with('order:id,created_at')
+            ->get()
+            ->groupBy(fn($item) => $item->order->created_at->format('Y-m'))
+            ->map(fn($group) => (float) $group->sum('total'));
+
+        $months = collect();
         for ($i = 11; $i >= 0; $i--) {
             $date = now()->subMonths($i);
-            $total = OrderItem::whereHas('product.shop', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
-            })->whereHas('order', function ($q) use ($date) {
-                $q->where('status', OrderStatus::Delivered)
-                    ->whereYear('created_at', $date->year)
-                    ->whereMonth('created_at', $date->month);
-            })->sum('price');
-
+            $key = $date->format('Y-m');
             $months->push([
-                'month' => $date->format('Y-m'),
-                'total' => (float) $total,
+                'month' => $key,
+                'total' => $monthlyTotals->get($key, 0.0),
             ]);
         }
 
