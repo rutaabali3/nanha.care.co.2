@@ -6,6 +6,7 @@ use App\Contracts\IDashboardService;
 use App\Models\Babysitting\Booking;
 use App\Models\Babysitting\BabysitterReview;
 use App\Models\Blog\BlogPost;
+use App\Enums\OrderStatus;
 use App\Models\Marketplace\Order;
 use App\Models\Marketplace\Product;
 use App\Models\Marketplace\ProductReview;
@@ -139,37 +140,52 @@ class DashboardService implements IDashboardService
         return Cache::remember("dashboard.shop_owner.{$userId}", 60, function () use ($userId) {
             $shop = Shop::where('user_id', $userId)->first();
             $shopId = $shop?->id;
-            $shopId ??= null;
+
+            if (!$shopId) {
+                return [
+                    'shop' => null,
+                    'total_products' => 0,
+                    'total_orders' => 0,
+                    'pending_orders' => 0,
+                    'total_revenue' => 0.0,
+                    'avg_rating' => 0.0,
+                    'total_reviews' => 0,
+                    'recent_orders' => collect(),
+                ];
+            }
+
+            // BOLT OPTIMIZATION: Pluck product IDs once for the shop to eliminate multi-table
+            // subqueries (whereHas('items.product')) across Order and ProductReview queries.
+            $productIds = Product::where('shop_id', $shopId)->pluck('id');
+
+            if ($productIds->isEmpty()) {
+                return [
+                    'shop' => $shop,
+                    'total_products' => 0,
+                    'total_orders' => 0,
+                    'pending_orders' => 0,
+                    'total_revenue' => 0.0,
+                    'avg_rating' => 0.0,
+                    'total_reviews' => 0,
+                    'recent_orders' => collect(),
+                ];
+            }
+
+            $orderQuery = Order::whereHas('items', fn($q) => $q->whereIn('product_id', $productIds));
 
             return [
                 'shop' => $shop,
-                'total_products' => $shopId ? Product::where('shop_id', $shopId)->count() : 0,
-                'total_orders' => $shopId ? Order::whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))->count() : 0,
-                'pending_orders' => $shopId
-                    ? Order::whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))
-                        ->where('status', 'pending')
-                        ->count()
-                    : 0,
-                'total_revenue' => $shopId
-                    ? (float) Order::whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))
-                        ->where('status', 'delivered')
-                        ->sum('total')
-                    : 0,
-                'avg_rating' => $shopId
-                    ? ProductReview::whereHas('product', fn($q) => $q->where('shop_id', $shopId))
-                        ->avg('rating')
-                    : 0,
-                'total_reviews' => $shopId
-                    ? ProductReview::whereHas('product', fn($q) => $q->where('shop_id', $shopId))
-                        ->count()
-                    : 0,
-                'recent_orders' => $shopId
-                    ? Order::with('parent', 'items.product')
-                        ->whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))
-                        ->orderByDesc('created_at')
-                        ->take(5)
-                        ->get()
-                    : collect(),
+                'total_products' => $productIds->count(),
+                'total_orders' => (clone $orderQuery)->count(),
+                'pending_orders' => (clone $orderQuery)->whereIn('status', ['pending', OrderStatus::Processing->value])->count(),
+                'total_revenue' => (float) (clone $orderQuery)->where('status', OrderStatus::Delivered->value)->sum('total'),
+                'avg_rating' => (float) (ProductReview::whereIn('product_id', $productIds)->avg('rating') ?? 0),
+                'total_reviews' => ProductReview::whereIn('product_id', $productIds)->count(),
+                'recent_orders' => (clone $orderQuery)
+                    ->with('parent', 'items.product')
+                    ->orderByDesc('created_at')
+                    ->take(5)
+                    ->get(),
             ];
         });
     }
