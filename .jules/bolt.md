@@ -1,0 +1,3 @@
+## 2026-07-09 - Pre-fetch Foreign Keys for Aggregate Queries
+**Learning:** Nested `whereHas` relationship checks across multiple models (e.g., `Order -> OrderItem -> Product`) create correlated `EXISTS` subqueries in SQL for every aggregate count/sum call (`total_orders`, `pending_orders`, `total_revenue`, `avg_rating`). Pre-fetching primary/foreign IDs into a flat collection once (`Product::where('shop_id', $shopId)->pluck('id')`) drastically reduces SQL query complexity from multi-table EXISTS joins to direct `whereIn('product_id', $ids)` queries.
+**Action:** When building dashboard overview methods with multiple aggregate metrics filtered by a parent model, pluck the IDs upfront and reuse `whereIn` queries on cloned base query builders.
