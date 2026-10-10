@@ -11,13 +11,25 @@ class SlugHelper
     {
         $slug = Str::slug($text);
         $original = $slug;
-        $counter = 1;
 
-        while (DB::table($model)->where($column, $slug)->exists()) {
-            $slug = $original . '-' . $counter++;
+        // Performance Optimization: Query all existing slugs starting with base slug in a single query
+        // to avoid N sequential DB exists checks in a loop during collision resolution.
+        $existingSlugs = DB::table($model)
+            ->where($column, $slug)
+            ->orWhere($column, 'like', $original . '-%')
+            ->pluck($column)
+            ->flip();
+
+        if (!isset($existingSlugs[$slug])) {
+            return $slug;
         }
 
-        return $slug;
+        $counter = 1;
+        while (isset($existingSlugs[$original . '-' . $counter])) {
+            $counter++;
+        }
+
+        return $original . '-' . $counter;
     }
 
     public static function generateFromTitle(string $title): string
@@ -29,21 +41,29 @@ class SlugHelper
     {
         $slug = Str::slug($title);
         $original = $slug;
-        $counter = 1;
 
-        $query = $model::where('slug', $slug);
+        // Performance Optimization: Fetch matching existing slugs in a single query using LIKE
+        // and check key presence in-memory, reducing database queries from O(N) to O(1).
+        $query = $model::where(function ($q) use ($slug, $original) {
+            $q->where('slug', $slug)
+              ->orWhere('slug', 'like', $original . '-%');
+        });
+
         if ($ignoreId !== null) {
             $query->where('id', '!=', $ignoreId);
         }
 
-        while ($query->exists()) {
-            $slug = $original . '-' . $counter++;
-            $query = $model::where('slug', $slug);
-            if ($ignoreId !== null) {
-                $query->where('id', '!=', $ignoreId);
-            }
+        $existingSlugs = $query->pluck('slug')->flip();
+
+        if (!isset($existingSlugs[$slug])) {
+            return $slug;
         }
 
-        return $slug;
+        $counter = 1;
+        while (isset($existingSlugs[$original . '-' . $counter])) {
+            $counter++;
+        }
+
+        return $original . '-' . $counter;
     }
 }
