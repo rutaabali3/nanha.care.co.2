@@ -20,7 +20,9 @@ class BabysitterService implements IBabysitterService
 
     public function getAll(array $filters): LengthAwarePaginator
     {
-        $query = BabysitterProfile::with('user', 'reviews');
+        // Optimization: Use withAvg to compute average rating directly in SQL query
+        // instead of eager loading all review models into memory for every card.
+        $query = BabysitterProfile::with('user')->withAvg('reviews', 'rating');
 
         if (!empty($filters['city'])) {
             $query->whereHas('user', fn($q) => $q->where('city', $filters['city']));
