@@ -56,4 +56,20 @@ class BabysitterProfile extends Model
     {
         return $this->hasMany(VerificationBadge::class, 'babysitter_profile_id');
     }
+
+    /**
+     * Bolt Optimization: Accessor for average rating.
+     * Prefers Eloquent's withAvg() attribute ('reviews_avg_rating') to avoid
+     * loading full review collections into memory.
+     */
+    public function getAvgRatingAttribute(): float
+    {
+        if (array_key_exists('reviews_avg_rating', $this->attributes)) {
+            return round((float) ($this->attributes['reviews_avg_rating'] ?? 0), 1);
+        }
+        if ($this->relationLoaded('reviews')) {
+            return round((float) ($this->reviews->avg('rating') ?? 0), 1);
+        }
+        return round((float) ($this->reviews()->avg('rating') ?? 0), 1);
+    }
 }
