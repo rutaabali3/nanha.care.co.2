@@ -11,7 +11,9 @@ class BabysitterService implements IBabysitterService
 {
     public function getFeatured(): Collection
     {
+        // Bolt Optimization: Use withAvg('reviews', 'rating') instead of eager loading full review models
         return BabysitterProfile::with('user')
+            ->withAvg('reviews', 'rating')
             ->where('verified_status', \App\Enums\VerifiedStatus::Verified)
             ->inRandomOrder()
             ->take(6)
@@ -20,7 +22,9 @@ class BabysitterService implements IBabysitterService
 
     public function getAll(array $filters): LengthAwarePaginator
     {
-        $query = BabysitterProfile::with('user', 'reviews');
+        // Bolt Optimization: Use withAvg('reviews', 'rating') instead of eager loading all review models
+        // to avoid loading hundreds/thousands of review records into memory.
+        $query = BabysitterProfile::with('user')->withAvg('reviews', 'rating');
 
         if (!empty($filters['city'])) {
             $query->whereHas('user', fn($q) => $q->where('city', $filters['city']));
@@ -37,6 +41,14 @@ class BabysitterService implements IBabysitterService
         if (!empty($filters['verified'])) {
             $query->where('verified_status', \App\Enums\VerifiedStatus::Verified);
         }
+
+        $sort = $filters['sort'] ?? 'newest';
+        match ($sort) {
+            'rate_asc' => $query->orderBy('hourly_rate', 'asc'),
+            'rate_desc' => $query->orderBy('hourly_rate', 'desc'),
+            'rating' => $query->orderByDesc('reviews_avg_rating'),
+            default => $query->orderByDesc('created_at'),
+        };
 
         return $query->paginate(12);
     }
