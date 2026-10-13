@@ -9,7 +9,7 @@ interface IOrderService
 {
     public function getByParent(string $userId): LengthAwarePaginator;
 
-    public function getByShopOwner(string $userId): LengthAwarePaginator;
+    public function getByShopOwner(string $userId, array $filters = []): LengthAwarePaginator;
 
     public function create(array $data, string $userId): Order;
 

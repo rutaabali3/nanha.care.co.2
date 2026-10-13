@@ -16,11 +16,15 @@ class OrdersController
     public function index(Request $request)
     {
         $status = $request->get('status');
-        $orders = $this->service->getByShopOwner(auth()->id());
+        $from = $request->get('from');
+        $to = $request->get('to');
 
-        if ($status) {
-            $orders = $orders->where('status', $status);
-        }
+        // Pass filter parameters array to service layer for database-level query filtering
+        $orders = $this->service->getByShopOwner(auth()->id(), array_filter([
+            'status' => $status,
+            'from' => $from,
+            'to' => $to,
+        ]));
 
         return view('dashboard.shop-owner.orders.index', compact('orders', 'status'));
     }

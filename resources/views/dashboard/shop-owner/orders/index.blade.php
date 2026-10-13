@@ -54,10 +54,11 @@
                         <td>{{ ucfirst($order->payment_method) }}</td>
                         <td>
                             @php
+                                $statusVal = $order->status->value ?? $order->status;
                                 $badgeColors = ['processing' => 'primary', 'shipped' => 'warning', 'delivered' => 'success', 'cancelled' => 'danger', 'returned' => 'purple'];
                             @endphp
-                            <span class="badge bg-{{ $badgeColors[$order->status] ?? 'secondary' }}">
-                                {{ ucfirst($order->status) }}
+                            <span class="badge bg-{{ $badgeColors[$statusVal] ?? 'secondary' }}">
+                                {{ ucfirst($statusVal) }}
                             </span>
                         </td>
                         <td>{{ $order->created_at->format('d M Y') }}</td>
@@ -67,11 +68,11 @@
                                     @csrf
                                     <select name="status" class="form-select form-select-sm d-inline w-auto" onchange="this.form.submit()">
                                         @foreach(['processing', 'shipped', 'delivered', 'cancelled', 'returned'] as $s)
-                                            <option value="{{ $s }}" @selected($order->status === $s)>{{ ucfirst($s) }}</option>
+                                            <option value="{{ $s }}" @selected(($order->status->value ?? $order->status) === $s)>{{ ucfirst($s) }}</option>
                                         @endforeach
                                     </select>
                                 </form>
-                                @if($order->status !== 'cancelled' && $order->status !== 'delivered')
+                                @if(($order->status->value ?? $order->status) !== 'cancelled' && ($order->status->value ?? $order->status) !== 'delivered')
                                 <form method="POST" action="{{ route('shop-owner.orders.cancel', $order->id) }}" id="cancel-order-{{ $order->id }}" class="d-inline">
                                     @csrf
                                     <button type="button" class="btn btn-sm btn-outline-danger" data-confirm-form="cancel-order-{{ $order->id }}">

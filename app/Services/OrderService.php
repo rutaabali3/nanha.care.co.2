@@ -27,12 +27,26 @@ class OrderService implements IOrderService
             ->paginate(10);
     }
 
-    public function getByShopOwner(string $userId): LengthAwarePaginator
+    public function getByShopOwner(string $userId, array $filters = []): LengthAwarePaginator
     {
-        return Order::with('items.product', 'parent')
-            ->whereHas('items.product.shop', fn($q) => $q->where('user_id', $userId))
-            ->orderByDesc('created_at')
-            ->paginate(10);
+        // Performance optimization: Filter status and date range at SQL level before pagination.
+        // Doing this in SQL ensures correct pagination counts and avoids fetching unneeded rows.
+        $query = Order::with('items.product', 'parent')
+            ->whereHas('items.product.shop', fn($q) => $q->where('user_id', $userId));
+
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (!empty($filters['from'])) {
+            $query->whereDate('created_at', '>=', $filters['from']);
+        }
+
+        if (!empty($filters['to'])) {
+            $query->whereDate('created_at', '<=', $filters['to']);
+        }
+
+        return $query->orderByDesc('created_at')->paginate(10);
     }
 
     public function create(array $data, string $userId): Order
