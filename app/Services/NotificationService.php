@@ -40,19 +40,31 @@ class NotificationService implements INotificationService
     public function broadcast(array $roles, string $message, ?string $link = null): void
     {
         $userIds = User::role($roles)->pluck('id');
+
+        // Early return if no target users exist for the given roles
+        if ($userIds->isEmpty()) {
+            return;
+        }
+
+        // Performance Optimization: Calculate timestamp once instead of invoking now() inside the loop per user
+        $now = now();
         $notifications = $userIds->map(fn($userId) => [
             'user_id' => $userId,
             'type' => 'broadcast',
             'message' => $message,
             'link' => $link,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'created_at' => $now,
+            'updated_at' => $now,
         ]);
         Notification::insert($notifications->toArray());
 
-        foreach ($userIds as $userId) {
-            Cache::forget("notifications.unread.{$userId}");
-            Cache::forget("notifications.recent.{$userId}");
-        }
+        // Performance Optimization: Use batch cache deletion (deleteMultiple) in a single operation
+        // instead of executing 2 * N individual Cache::forget() calls in a loop.
+        $cacheKeys = $userIds->flatMap(fn($userId) => [
+            "notifications.unread.{$userId}",
+            "notifications.recent.{$userId}",
+        ])->all();
+
+        Cache::deleteMultiple($cacheKeys);
     }
 }
