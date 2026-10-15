@@ -1,0 +1,3 @@
+## 2026-10-15 - Prefer SQL Aggregates (withAvg) Over Eager Loading Collections for Ratings
+**Learning:** Eager loading full Eloquent model collections (`with('reviews')`) on paginated list endpoints hydrates many unnecessary model instances into PHP memory when only aggregate values (like average rating) are needed. Using Laravel's `withAvg('reviews', 'rating')` delegates aggregate calculation to the database, drastically reducing memory consumption and model hydration overhead.
+**Action:** When displaying summary cards or paginated lists that require aggregate statistics (averages, counts), use Eloquent's `withAvg`/`withCount` methods and accessors rather than eager loading full relationship collections.
