@@ -13,7 +13,7 @@
         <p class="text-muted small mb-2">
             <i class="bi bi-geo-alt-fill me-1"></i>{{ $babysitter->city ?? 'N/A' }}
         </p>
-        @include('partials._star-rating', ['rating' => $babysitter->avgRating ?? 0])
+        @include('partials._star-rating', ['rating' => $babysitter->reviews_avg_rating ?? $babysitter->avgRating ?? 0])
         <div class="mt-2 mb-3">
             @if(isset($babysitter->specializations) && count($babysitter->specializations))
                 @foreach(array_slice($babysitter->specializations, 0, 3) as $spec)
