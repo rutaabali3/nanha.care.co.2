@@ -56,4 +56,20 @@ class BabysitterProfile extends Model
     {
         return $this->hasMany(VerificationBadge::class, 'babysitter_profile_id');
     }
+
+    /**
+     * Get calculated average rating, defaulting to 0 if not pre-aggregated or no reviews exist.
+     */
+    public function getAvgRatingAttribute(): float
+    {
+        return (float) ($this->reviews_avg_rating ?? 0);
+    }
+
+    /**
+     * Convenient accessor for city from the associated user profile.
+     */
+    public function getCityAttribute(): ?string
+    {
+        return $this->user?->city;
+    }
 }
