@@ -35,4 +35,18 @@ class Shop extends Model
     {
         return $this->hasMany(Product::class);
     }
+
+    public function productReviews()
+    {
+        return $this->hasManyThrough(ProductReview::class, Product::class);
+    }
+
+    /**
+     * Calculate average rating for the shop across all its product reviews.
+     * Evaluates rating aggregate via efficient hasManyThrough relationship query.
+     */
+    public function averageRating(): float
+    {
+        return (float) ($this->productReviews()->avg('rating') ?: 0);
+    }
 }
