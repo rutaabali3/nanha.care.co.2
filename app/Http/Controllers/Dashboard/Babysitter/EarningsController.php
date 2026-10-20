@@ -6,6 +6,7 @@ use App\Contracts\IPaymentService;
 use App\Models\Babysitting\Booking;
 use App\Enums\BookingStatus;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class EarningsController
 {
@@ -27,19 +28,33 @@ class EarningsController
     public function chartData()
     {
         $userId = auth()->id();
+        $startDate = now()->subMonths(11)->startOfMonth();
+
+        // Optimization: Execute a single aggregate SQL query grouped by year and month
+        // instead of running 12 separate database queries in a loop.
+        $driver = DB::connection()->getDriverName();
+        $monthKeySql = $driver === 'sqlite'
+            ? "strftime('%Y-%m', date) as month_key"
+            : "DATE_FORMAT(date, '%Y-%m') as month_key";
+
+        $monthlyTotals = Booking::where('babysitter_id', $userId)
+            ->where('status', BookingStatus::Completed)
+            ->where('date', '>=', $startDate->toDateString())
+            ->selectRaw("{$monthKeySql}, SUM(total_fee) as total")
+            ->groupBy('month_key')
+            ->pluck('total', 'month_key');
+
         $months = collect();
         for ($i = 11; $i >= 0; $i--) {
             $date = now()->subMonths($i);
-            $total = Booking::where('babysitter_id', $userId)
-                ->where('status', BookingStatus::Completed)
-                ->whereYear('date', $date->year)
-                ->whereMonth('date', $date->month)
-                ->sum('total_fee');
+            $monthKey = $date->format('Y-m');
+
             $months->push([
-                'month' => $date->format('Y-m'),
-                'total' => (float) $total,
+                'month' => $monthKey,
+                'total' => (float) ($monthlyTotals->get($monthKey) ?? 0),
             ]);
         }
+
         return response()->json($months);
     }
 
