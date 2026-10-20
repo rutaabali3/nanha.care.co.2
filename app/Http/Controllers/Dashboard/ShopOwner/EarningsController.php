@@ -8,6 +8,7 @@ use App\Models\Marketplace\Order;
 use App\Models\Marketplace\OrderItem;
 use App\Models\System\PlatformSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class EarningsController
 {
@@ -39,21 +40,34 @@ class EarningsController
     public function chartData()
     {
         $userId = auth()->id();
-        $months = collect();
+        $startDate = now()->subMonths(11)->startOfMonth();
 
+        // Optimization: Execute a single aggregate SQL query grouped by year and month
+        // instead of running 12 separate database queries in a loop.
+        $driver = DB::connection()->getDriverName();
+        $monthKeySql = $driver === 'sqlite'
+            ? "strftime('%Y-%m', order_items.created_at) as month_key"
+            : "DATE_FORMAT(order_items.created_at, '%Y-%m') as month_key";
+
+        $monthlyTotals = OrderItem::whereHas('product.shop', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            })
+            ->whereHas('order', function ($q) use ($startDate) {
+                $q->where('status', OrderStatus::Delivered)
+                    ->where('created_at', '>=', $startDate);
+            })
+            ->selectRaw("{$monthKeySql}, SUM(order_items.total) as total")
+            ->groupBy('month_key')
+            ->pluck('total', 'month_key');
+
+        $months = collect();
         for ($i = 11; $i >= 0; $i--) {
             $date = now()->subMonths($i);
-            $total = OrderItem::whereHas('product.shop', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
-            })->whereHas('order', function ($q) use ($date) {
-                $q->where('status', OrderStatus::Delivered)
-                    ->whereYear('created_at', $date->year)
-                    ->whereMonth('created_at', $date->month);
-            })->sum('price');
+            $monthKey = $date->format('Y-m');
 
             $months->push([
-                'month' => $date->format('Y-m'),
-                'total' => (float) $total,
+                'month' => $monthKey,
+                'total' => (float) ($monthlyTotals->get($monthKey) ?? 0),
             ]);
         }
 
