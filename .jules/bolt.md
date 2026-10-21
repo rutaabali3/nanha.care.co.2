@@ -1,0 +1,3 @@
+## 2026-10-21 - Eager loading opposite relationship in scoped listing queries
+**Learning:** In service methods scoped to a specific owner (e.g. `getByParent($userId)`), eager loading `parent` is redundant since the parent is already known. Conversely, Blade views rendering list items (e.g., `dashboard.parent.bookings.index`) access the counterpart relation (`$booking->babysitter->name`), triggering N+1 database queries if `babysitter` is not eager-loaded.
+**Action:** When inspecting query performance in role-scoped services, verify that the relation accessed in dashboard views (the non-owner entity) is eager-loaded, rather than eager-loading the owner entity.
