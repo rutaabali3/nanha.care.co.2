@@ -32,7 +32,18 @@ class ModerationService implements IModerationService
         $types = $type ? (isset($this->typeMap[$type]) ? [$type => $this->typeMap[$type]] : []) : $this->typeMap;
 
         foreach ($types as $key => $class) {
-            $items = $class::where('status', ContentStatus::UnderReview)->get()->map(
+            $query = $class::where('status', ContentStatus::UnderReview);
+
+            // ⚡ Bolt Optimization: Eager load relations to prevent N+1 queries during queue rendering
+            if ($class === Product::class) {
+                $query->with('shop.owner');
+            } elseif ($class === BlogPost::class) {
+                $query->with('doctor');
+            } elseif ($class === BabysitterProfile::class) {
+                $query->with('user');
+            }
+
+            $items = $query->get()->map(
                 fn($item) => ['type' => $key, 'item' => $item]
             );
             $result = $result->concat($items);
@@ -94,8 +105,18 @@ class ModerationService implements IModerationService
     public function getPublished(?string $type = null): LengthAwarePaginator
     {
         $class = $this->typeMap[$type] ?? BlogPost::class;
-        return $class::where('status', ContentStatus::Published)
-            ->orderByDesc('created_at')
+        $query = $class::where('status', ContentStatus::Published);
+
+        // ⚡ Bolt Optimization: Eager load relations to prevent N+1 queries when rendering published content list
+        if ($class === Product::class) {
+            $query->with('shop.owner');
+        } elseif ($class === BlogPost::class) {
+            $query->with('doctor');
+        } elseif ($class === BabysitterProfile::class) {
+            $query->with('user');
+        }
+
+        return $query->orderByDesc('created_at')
             ->paginate(15);
     }
 
