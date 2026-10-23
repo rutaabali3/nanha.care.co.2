@@ -56,4 +56,23 @@ class BabysitterProfile extends Model
     {
         return $this->hasMany(VerificationBadge::class, 'babysitter_profile_id');
     }
+
+    /**
+     * Get the average rating for the babysitter.
+     * Performance optimization: Prioritizes database-level eager aggregation attribute
+     * `reviews_avg_rating` (from withAvg) to prevent N+1 queries and avoid
+     * instantiating all child review models when rendering card views.
+     */
+    public function getAvgRatingAttribute(): float
+    {
+        if (array_key_exists('reviews_avg_rating', $this->attributes)) {
+            return (float) ($this->attributes['reviews_avg_rating'] ?? 0);
+        }
+
+        if ($this->relationLoaded('reviews')) {
+            return (float) ($this->reviews->avg('rating') ?? 0);
+        }
+
+        return (float) ($this->reviews()->avg('rating') ?? 0);
+    }
 }
