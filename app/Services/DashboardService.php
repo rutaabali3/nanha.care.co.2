@@ -7,6 +7,7 @@ use App\Models\Babysitting\Booking;
 use App\Models\Babysitting\BabysitterReview;
 use App\Models\Blog\BlogPost;
 use App\Models\Marketplace\Order;
+use App\Models\Marketplace\OrderItem;
 use App\Models\Marketplace\Product;
 use App\Models\Marketplace\ProductReview;
 use App\Models\Marketplace\Shop;
@@ -138,38 +139,57 @@ class DashboardService implements IDashboardService
     {
         return Cache::remember("dashboard.shop_owner.{$userId}", 60, function () use ($userId) {
             $shop = Shop::where('user_id', $userId)->first();
-            $shopId = $shop?->id;
-            $shopId ??= null;
+            if (!$shop) {
+                return [
+                    'shop' => null,
+                    'total_products' => 0,
+                    'total_orders' => 0,
+                    'pending_orders' => 0,
+                    'total_revenue' => 0.0,
+                    'avg_rating' => 0,
+                    'total_reviews' => 0,
+                    'recent_orders' => collect(),
+                ];
+            }
+
+            $totalProducts = Product::where('shop_id', $shop->id)->count();
+
+            if ($totalProducts === 0) {
+                return [
+                    'shop' => $shop,
+                    'total_products' => 0,
+                    'total_orders' => 0,
+                    'pending_orders' => 0,
+                    'total_revenue' => 0.0,
+                    'avg_rating' => 0,
+                    'total_reviews' => 0,
+                    'recent_orders' => collect(),
+                ];
+            }
+
+            // Subquery for shop product IDs prevents loading array into PHP memory
+            $productSubquery = Product::where('shop_id', $shop->id)->select('id');
+
+            // Query review metrics using indexed subquery on product_id
+            $avgRating = ProductReview::whereIn('product_id', $productSubquery)->avg('rating') ?? 0;
+            $totalReviews = ProductReview::whereIn('product_id', $productSubquery)->count();
+
+            // Order subquery joining order_items for efficiency without correlated whereHas
+            $orderSubquery = OrderItem::whereIn('product_id', $productSubquery)->select('order_id');
 
             return [
                 'shop' => $shop,
-                'total_products' => $shopId ? Product::where('shop_id', $shopId)->count() : 0,
-                'total_orders' => $shopId ? Order::whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))->count() : 0,
-                'pending_orders' => $shopId
-                    ? Order::whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))
-                        ->where('status', 'pending')
-                        ->count()
-                    : 0,
-                'total_revenue' => $shopId
-                    ? (float) Order::whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))
-                        ->where('status', 'delivered')
-                        ->sum('total')
-                    : 0,
-                'avg_rating' => $shopId
-                    ? ProductReview::whereHas('product', fn($q) => $q->where('shop_id', $shopId))
-                        ->avg('rating')
-                    : 0,
-                'total_reviews' => $shopId
-                    ? ProductReview::whereHas('product', fn($q) => $q->where('shop_id', $shopId))
-                        ->count()
-                    : 0,
-                'recent_orders' => $shopId
-                    ? Order::with('parent', 'items.product')
-                        ->whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))
-                        ->orderByDesc('created_at')
-                        ->take(5)
-                        ->get()
-                    : collect(),
+                'total_products' => $totalProducts,
+                'total_orders' => Order::whereIn('id', $orderSubquery)->count(),
+                'pending_orders' => Order::whereIn('id', $orderSubquery)->whereIn('status', [\App\Enums\OrderStatus::Processing, 'pending'])->count(),
+                'total_revenue' => (float) Order::whereIn('id', $orderSubquery)->where('status', \App\Enums\OrderStatus::Delivered)->sum('total'),
+                'avg_rating' => $avgRating,
+                'total_reviews' => $totalReviews,
+                'recent_orders' => Order::with('parent', 'items.product')
+                    ->whereIn('id', $orderSubquery)
+                    ->orderByDesc('created_at')
+                    ->take(5)
+                    ->get(),
             ];
         });
     }

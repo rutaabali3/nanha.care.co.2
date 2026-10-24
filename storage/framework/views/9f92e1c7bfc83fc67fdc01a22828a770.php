@@ -1,0 +1,41 @@
+<?php
+    $userId = auth()->id();
+    $unreadCount = \Illuminate\Support\Facades\Cache::remember("notifications.unread.$userId", 60, function () use ($userId) {
+        return \App\Models\Notification::where('user_id', $userId)->where('is_read', false)->count();
+    });
+    $recentNotifications = \Illuminate\Support\Facades\Cache::remember("notifications.recent.$userId", 60, function () use ($userId) {
+        return \App\Models\Notification::where('user_id', $userId)->where('is_read', false)->latest()->take(10)->get();
+    });
+?>
+<div class="dropdown">
+    <button class="btn position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background: transparent; border: none;">
+        <i class="bi bi-bell fs-5 text-dark"></i>
+        <?php if($unreadCount > 0): ?>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                <?php echo e($unreadCount > 99 ? '99+' : $unreadCount); ?>
+
+            </span>
+        <?php endif; ?>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end" style="width: 320px;">
+        <li><h6 class="dropdown-header">Notifications</h6></li>
+        <?php $__empty_1 = true; $__currentLoopData = $recentNotifications; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $notification): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+            <li>
+                <a class="dropdown-item d-flex align-items-start gap-2" href="<?php echo e(route('notifications.mark-read', $notification->id)); ?>" style="white-space: normal;">
+                    <span class="mt-1">
+                        <span class="badge rounded-pill bg-sky-blue" style="width: 8px; height: 8px; display: inline-block; padding: 0;"></span>
+                    </span>
+                    <div>
+                        <p class="mb-0 small"><?php echo e($notification->message); ?></p>
+                        <small class="text-muted"><?php echo e($notification->created_at->diffForHumans()); ?></small>
+                    </div>
+                </a>
+            </li>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+            <li><span class="dropdown-item-text text-muted small">No new notifications</span></li>
+        <?php endif; ?>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item text-center small" href="<?php echo e(route('notifications.index')); ?>">View all notifications</a></li>
+    </ul>
+</div>
+<?php /**PATH /app/resources/views/components/notification-bell.blade.php ENDPATH**/ ?>
