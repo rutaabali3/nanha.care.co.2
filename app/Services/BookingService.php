@@ -33,7 +33,8 @@ class BookingService implements IBookingService
 
     public function getByParent(string $userId, ?string $status): LengthAwarePaginator
     {
-        $query = Booking::with('parent', 'bookingChildren.child')
+        // Eager load 'babysitter' instead of 'parent' to eliminate N+1 queries when displaying babysitter details on the parent bookings table.
+        $query = Booking::with('babysitter', 'bookingChildren.child')
             ->where('parent_id', $userId);
         if ($status) {
             $query->where('status', $status);
