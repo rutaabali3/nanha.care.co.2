@@ -7,6 +7,7 @@ use App\Models\Babysitting\BabysitterReview;
 use App\Models\Babysitting\VerificationBadge;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class BabysitterProfile extends Model
 {
@@ -32,14 +33,28 @@ class BabysitterProfile extends Model
     protected static function booted()
     {
         static::saved(function () {
-            \Illuminate\Support\Facades\Cache::forget('babysitter_cities');
-            \Illuminate\Support\Facades\Cache::forget('babysitter_specializations');
+            Cache::forget('babysitter_cities');
+            Cache::forget('babysitter_specializations');
+            Cache::forget('featured_babysitters');
         });
 
         static::deleted(function () {
-            \Illuminate\Support\Facades\Cache::forget('babysitter_cities');
-            \Illuminate\Support\Facades\Cache::forget('babysitter_specializations');
+            Cache::forget('babysitter_cities');
+            Cache::forget('babysitter_specializations');
+            Cache::forget('featured_babysitters');
         });
+    }
+
+    /**
+     * Get the average rating computed via subquery (withAvg) or relationship fallback.
+     */
+    public function getAvgRatingAttribute(): float
+    {
+        if (array_key_exists('reviews_avg_rating', $this->attributes)) {
+            return round((float) ($this->attributes['reviews_avg_rating'] ?? 0), 1);
+        }
+
+        return round((float) ($this->reviews()->avg('rating') ?? 0), 1);
     }
 
     public function user()
