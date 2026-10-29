@@ -3,10 +3,11 @@
 namespace App\Services;
 
 use App\Contracts\IDashboardService;
-use App\Models\Babysitting\Booking;
 use App\Models\Babysitting\BabysitterReview;
+use App\Models\Babysitting\Booking;
 use App\Models\Blog\BlogPost;
 use App\Models\Marketplace\Order;
+use App\Models\Marketplace\OrderItem;
 use App\Models\Marketplace\Product;
 use App\Models\Marketplace\ProductReview;
 use App\Models\Marketplace\Shop;
@@ -17,7 +18,6 @@ use App\Models\System\ModerationLog;
 use App\Models\System\RoleAssignmentLog;
 use App\Models\System\UserReport;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 
 class DashboardService implements IDashboardService
@@ -45,15 +45,15 @@ class DashboardService implements IDashboardService
                     'open_tickets' => $openTickets,
                 ],
                 'recentActivity' => collect()
-                    ->concat(ModerationLog::with('moderator')->orderByDesc('created_at')->take(5)->get()->map(fn($log) => [
+                    ->concat(ModerationLog::with('moderator')->orderByDesc('created_at')->take(5)->get()->map(fn ($log) => [
                         'type' => 'Moderation',
-                        'action' => ucfirst($log->action) . ' on ' . class_basename($log->target_type) . ' #' . $log->target_id,
+                        'action' => ucfirst($log->action).' on '.class_basename($log->target_type).' #'.$log->target_id,
                         'user_name' => $log->moderator?->name ?? 'Unknown',
                         'timestamp' => $log->submitted_at ?? $log->created_at,
                     ]))
-                    ->concat(RoleAssignmentLog::with('admin')->orderByDesc('created_at')->take(5)->get()->map(fn($log) => [
+                    ->concat(RoleAssignmentLog::with('admin')->orderByDesc('created_at')->take(5)->get()->map(fn ($log) => [
                         'type' => 'Role Assignment',
-                        'action' => 'Changed role to ' . $log->new_role,
+                        'action' => 'Changed role to '.$log->new_role,
                         'user_name' => $log->admin?->name ?? 'Unknown',
                         'timestamp' => $log->created_at,
                     ]))
@@ -138,38 +138,57 @@ class DashboardService implements IDashboardService
     {
         return Cache::remember("dashboard.shop_owner.{$userId}", 60, function () use ($userId) {
             $shop = Shop::where('user_id', $userId)->first();
-            $shopId = $shop?->id;
-            $shopId ??= null;
+            if (! $shop) {
+                return [
+                    'shop' => null,
+                    'total_products' => 0,
+                    'total_orders' => 0,
+                    'pending_orders' => 0,
+                    'total_revenue' => 0,
+                    'avg_rating' => 0,
+                    'total_reviews' => 0,
+                    'recent_orders' => collect(),
+                ];
+            }
+
+            $shopId = $shop->id;
+
+            // Bolt Optimization: Retrieve product IDs once to avoid redundant multi-table EXISTS subqueries across multiple order and review metrics.
+            $productIds = Product::where('shop_id', $shopId)->pluck('id');
+
+            if ($productIds->isEmpty()) {
+                return [
+                    'shop' => $shop,
+                    'total_products' => 0,
+                    'total_orders' => 0,
+                    'pending_orders' => 0,
+                    'total_revenue' => 0,
+                    'avg_rating' => 0,
+                    'total_reviews' => 0,
+                    'recent_orders' => collect(),
+                ];
+            }
+
+            // Subquery select for order IDs belonging to these products
+            $shopOrderIds = OrderItem::whereIn('product_id', $productIds)->select('order_id');
 
             return [
                 'shop' => $shop,
-                'total_products' => $shopId ? Product::where('shop_id', $shopId)->count() : 0,
-                'total_orders' => $shopId ? Order::whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))->count() : 0,
-                'pending_orders' => $shopId
-                    ? Order::whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))
-                        ->where('status', 'pending')
-                        ->count()
-                    : 0,
-                'total_revenue' => $shopId
-                    ? (float) Order::whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))
-                        ->where('status', 'delivered')
-                        ->sum('total')
-                    : 0,
-                'avg_rating' => $shopId
-                    ? ProductReview::whereHas('product', fn($q) => $q->where('shop_id', $shopId))
-                        ->avg('rating')
-                    : 0,
-                'total_reviews' => $shopId
-                    ? ProductReview::whereHas('product', fn($q) => $q->where('shop_id', $shopId))
-                        ->count()
-                    : 0,
-                'recent_orders' => $shopId
-                    ? Order::with('parent', 'items.product')
-                        ->whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))
-                        ->orderByDesc('created_at')
-                        ->take(5)
-                        ->get()
-                    : collect(),
+                'total_products' => $productIds->count(),
+                'total_orders' => Order::whereIn('id', $shopOrderIds)->count(),
+                'pending_orders' => Order::whereIn('id', $shopOrderIds)
+                    ->where('status', 'pending')
+                    ->count(),
+                'total_revenue' => (float) Order::whereIn('id', $shopOrderIds)
+                    ->where('status', 'delivered')
+                    ->sum('total'),
+                'avg_rating' => (float) (ProductReview::whereIn('product_id', $productIds)->avg('rating') ?? 0),
+                'total_reviews' => ProductReview::whereIn('product_id', $productIds)->count(),
+                'recent_orders' => Order::with('parent', 'items.product')
+                    ->whereIn('id', $shopOrderIds)
+                    ->orderByDesc('created_at')
+                    ->take(5)
+                    ->get(),
             ];
         });
     }
