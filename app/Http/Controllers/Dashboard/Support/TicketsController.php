@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Dashboard\Support;
 use App\Contracts\ISupportTicketService;
 use App\Http\Requests\Support\TicketReplyRequest;
 use App\Models\Support\ReplyTemplate;
-use App\Models\User;
 use Illuminate\Http\Request;
 
 class TicketsController

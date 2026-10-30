@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Contracts\IBabysitterService;
+use App\Enums\VerifiedStatus;
 use App\Models\Profiles\BabysitterProfile;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -12,7 +13,7 @@ class BabysitterService implements IBabysitterService
     public function getFeatured(): Collection
     {
         return BabysitterProfile::with('user')
-            ->where('verified_status', \App\Enums\VerifiedStatus::Verified)
+            ->where('verified_status', VerifiedStatus::Verified)
             ->inRandomOrder()
             ->take(6)
             ->get();
@@ -22,20 +23,20 @@ class BabysitterService implements IBabysitterService
     {
         $query = BabysitterProfile::with('user', 'reviews');
 
-        if (!empty($filters['city'])) {
-            $query->whereHas('user', fn($q) => $q->where('city', $filters['city']));
+        if (! empty($filters['city'])) {
+            $query->whereHas('user', fn ($q) => $q->where('city', $filters['city']));
         }
-        if (!empty($filters['min_rate'])) {
+        if (! empty($filters['min_rate'])) {
             $query->where('hourly_rate', '>=', $filters['min_rate']);
         }
-        if (!empty($filters['max_rate'])) {
+        if (! empty($filters['max_rate'])) {
             $query->where('hourly_rate', '<=', $filters['max_rate']);
         }
-        if (!empty($filters['specialization'])) {
+        if (! empty($filters['specialization'])) {
             $query->whereJsonContains('specializations', $filters['specialization']);
         }
-        if (!empty($filters['verified'])) {
-            $query->where('verified_status', \App\Enums\VerifiedStatus::Verified);
+        if (! empty($filters['verified'])) {
+            $query->where('verified_status', VerifiedStatus::Verified);
         }
 
         return $query->paginate(12);
@@ -50,7 +51,8 @@ class BabysitterService implements IBabysitterService
     {
         $profile = BabysitterProfile::where('user_id', $userId)->firstOrFail();
         $fields = ['bio', 'hourly_rate', 'experience_years', 'specializations', 'cnic', 'avatar', 'availability'];
-        $filled = collect($fields)->filter(fn($f) => !empty($profile->$f))->count();
+        $filled = collect($fields)->filter(fn ($f) => ! empty($profile->$f))->count();
+
         return (int) round(($filled / count($fields)) * 100);
     }
 }

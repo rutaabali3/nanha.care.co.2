@@ -1,16 +1,16 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BabysittersController;
-use App\Http\Controllers\MarketplaceController;
-use App\Http\Controllers\ShopController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CartController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\ShopController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
@@ -84,4 +84,3 @@ require __DIR__.'/parent.php';
 require __DIR__.'/shop-owner.php';
 require __DIR__.'/doctor.php';
 require __DIR__.'/support.php';
-

@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Profiles\ParentProfile;
+use App\Enums\UserStatus;
+use App\Models\Marketplace\Shop;
 use App\Models\Profiles\DoctorProfile;
+use App\Models\Profiles\ParentProfile;
+use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -31,7 +33,7 @@ class OnboardingRedirectTest extends TestCase
             'name' => 'Test Parent',
             'email' => 'parent@example.com',
             'password' => bcrypt('password'),
-            'status' => \App\Enums\UserStatus::Active,
+            'status' => UserStatus::Active,
         ]);
         $user->assignRole('parent');
 
@@ -45,7 +47,7 @@ class OnboardingRedirectTest extends TestCase
             'name' => 'Test Parent',
             'email' => 'parent@example.com',
             'password' => bcrypt('password'),
-            'status' => \App\Enums\UserStatus::Active,
+            'status' => UserStatus::Active,
         ]);
         $user->assignRole('parent');
 
@@ -62,7 +64,7 @@ class OnboardingRedirectTest extends TestCase
             'name' => 'Test Parent',
             'email' => 'parent@example.com',
             'password' => bcrypt('password'),
-            'status' => \App\Enums\UserStatus::Active,
+            'status' => UserStatus::Active,
         ]);
         $user->assignRole('parent');
 
@@ -87,7 +89,7 @@ class OnboardingRedirectTest extends TestCase
             'name' => 'Test Doctor',
             'email' => 'doctor@example.com',
             'password' => bcrypt('password'),
-            'status' => \App\Enums\UserStatus::Active,
+            'status' => UserStatus::Active,
         ]);
         $user->assignRole('doctor');
 
@@ -101,7 +103,7 @@ class OnboardingRedirectTest extends TestCase
             'name' => 'Test Doctor',
             'email' => 'doctor@example.com',
             'password' => bcrypt('password'),
-            'status' => \App\Enums\UserStatus::Active,
+            'status' => UserStatus::Active,
         ]);
         $user->assignRole('doctor');
 
@@ -123,7 +125,7 @@ class OnboardingRedirectTest extends TestCase
             'name' => 'Test Shop Owner',
             'email' => 'shopowner@example.com',
             'password' => bcrypt('password'),
-            'status' => \App\Enums\UserStatus::Active,
+            'status' => UserStatus::Active,
         ]);
         $user->assignRole('shop_owner');
 
@@ -140,7 +142,7 @@ class OnboardingRedirectTest extends TestCase
 
         $response->assertRedirect('/dashboard/shop-owner');
 
-        $shop = \App\Models\Marketplace\Shop::where('user_id', $user->id)->first();
+        $shop = Shop::where('user_id', $user->id)->first();
         $this->assertNotNull($shop);
         $this->assertEquals(['toys', 'clothing'], $shop->category);
     }

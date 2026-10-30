@@ -5,6 +5,7 @@ namespace App\Models\System;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class Notification extends Model
 {
@@ -27,13 +28,13 @@ class Notification extends Model
     protected static function booted()
     {
         static::saved(function ($notification) {
-            \Illuminate\Support\Facades\Cache::forget("notifications.unread.{$notification->user_id}");
-            \Illuminate\Support\Facades\Cache::forget("notifications.recent.{$notification->user_id}");
+            Cache::forget("notifications.unread.{$notification->user_id}");
+            Cache::forget("notifications.recent.{$notification->user_id}");
         });
 
         static::deleted(function ($notification) {
-            \Illuminate\Support\Facades\Cache::forget("notifications.unread.{$notification->user_id}");
-            \Illuminate\Support\Facades\Cache::forget("notifications.recent.{$notification->user_id}");
+            Cache::forget("notifications.unread.{$notification->user_id}");
+            Cache::forget("notifications.recent.{$notification->user_id}");
         });
     }
 

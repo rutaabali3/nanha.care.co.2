@@ -1,12 +1,12 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Dashboard\Babysitter\DashboardController;
 use App\Http\Controllers\Dashboard\Babysitter\BookingsController;
-use App\Http\Controllers\Dashboard\Babysitter\ProfileController;
+use App\Http\Controllers\Dashboard\Babysitter\DashboardController;
 use App\Http\Controllers\Dashboard\Babysitter\EarningsController;
-use App\Http\Controllers\Dashboard\Babysitter\ReviewsController;
 use App\Http\Controllers\Dashboard\Babysitter\NotificationsController;
+use App\Http\Controllers\Dashboard\Babysitter\ProfileController;
+use App\Http\Controllers\Dashboard\Babysitter\ReviewsController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('/dashboard/babysitter')->middleware(['auth', 'role:babysitter', 'onboarded'])->group(function () {
 

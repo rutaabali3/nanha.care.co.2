@@ -15,6 +15,7 @@ class OrdersController
     public function index()
     {
         $orders = $this->service->getByParent(auth()->id());
+
         return view('dashboard.parent.orders.index', compact('orders'));
     }
 

@@ -13,6 +13,7 @@ class DashboardController
     public function index()
     {
         $data = $this->service->getDoctorOverview(auth()->id());
+
         return view('dashboard.doctor.index', $data);
     }
 }

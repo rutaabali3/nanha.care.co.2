@@ -7,6 +7,7 @@ use App\Models\Babysitting\BabysitterReview;
 use App\Models\Babysitting\VerificationBadge;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class BabysitterProfile extends Model
 {
@@ -32,13 +33,13 @@ class BabysitterProfile extends Model
     protected static function booted()
     {
         static::saved(function () {
-            \Illuminate\Support\Facades\Cache::forget('babysitter_cities');
-            \Illuminate\Support\Facades\Cache::forget('babysitter_specializations');
+            Cache::forget('babysitter_cities');
+            Cache::forget('babysitter_specializations');
         });
 
         static::deleted(function () {
-            \Illuminate\Support\Facades\Cache::forget('babysitter_cities');
-            \Illuminate\Support\Facades\Cache::forget('babysitter_specializations');
+            Cache::forget('babysitter_cities');
+            Cache::forget('babysitter_specializations');
         });
     }
 

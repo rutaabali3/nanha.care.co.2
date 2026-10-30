@@ -16,6 +16,7 @@ class ProfileController
     public function index()
     {
         $shop = Shop::where('user_id', auth()->id())->firstOrFail();
+
         return view('dashboard.shop-owner.profile.index', compact('shop'));
     }
 

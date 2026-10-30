@@ -55,7 +55,7 @@ class SettingsController
 
         $user = auth()->user();
 
-        if (!Hash::check($validated['current_password'], $user->password)) {
+        if (! Hash::check($validated['current_password'], $user->password)) {
             return redirect()->back()->withErrors([
                 'current_password' => 'Current password is incorrect.',
             ]);

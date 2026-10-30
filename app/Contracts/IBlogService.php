@@ -5,6 +5,7 @@ namespace App\Contracts;
 use App\Models\Blog\BlogPost;
 use App\Models\Blog\Comment;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 interface IBlogService
 {
@@ -20,5 +21,5 @@ interface IBlogService
 
     public function addComment(int $postId, string $content, string $userId): Comment;
 
-    public function getRelatedPosts(BlogPost $post, int $limit = 3): \Illuminate\Database\Eloquent\Collection;
+    public function getRelatedPosts(BlogPost $post, int $limit = 3): Collection;
 }

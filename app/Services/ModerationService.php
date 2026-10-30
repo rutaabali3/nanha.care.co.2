@@ -33,7 +33,7 @@ class ModerationService implements IModerationService
 
         foreach ($types as $key => $class) {
             $items = $class::where('status', ContentStatus::UnderReview)->get()->map(
-                fn($item) => ['type' => $key, 'item' => $item]
+                fn ($item) => ['type' => $key, 'item' => $item]
             );
             $result = $result->concat($items);
         }
@@ -94,6 +94,7 @@ class ModerationService implements IModerationService
     public function getPublished(?string $type = null): LengthAwarePaginator
     {
         $class = $this->typeMap[$type] ?? BlogPost::class;
+
         return $class::where('status', ContentStatus::Published)
             ->orderByDesc('created_at')
             ->paginate(15);
@@ -120,6 +121,7 @@ class ModerationService implements IModerationService
     private function resolve(string $type, int $id): mixed
     {
         $class = $this->typeMap[$type] ?? throw new \InvalidArgumentException("Unknown type: {$type}");
+
         return $class::findOrFail($id);
     }
 }

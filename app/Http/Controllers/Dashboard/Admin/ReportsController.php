@@ -4,11 +4,9 @@ namespace App\Http\Controllers\Dashboard\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Babysitting\Booking;
-use App\Models\Marketplace\Order;
 use App\Models\Marketplace\OrderItem;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Response;
 
 class ReportsController extends Controller
@@ -43,7 +41,7 @@ class ReportsController extends Controller
     public function topProducts()
     {
         $data = OrderItem::selectRaw('product_id, SUM(qty) as total_qty')
-            ->whereHas('order', fn($q) => $q->where('status', 'delivered'))
+            ->whereHas('order', fn ($q) => $q->where('status', 'delivered'))
             ->groupBy('product_id')
             ->orderByDesc('total_qty')
             ->take(10)
@@ -67,7 +65,7 @@ class ReportsController extends Controller
     public function export(Request $request)
     {
         $type = $request->get('type', 'users');
-        $headers = [['Content-Type' => 'text/csv', 'Content-Disposition' => 'attachment; filename="' . $type . '.csv"']];
+        $headers = [['Content-Type' => 'text/csv', 'Content-Disposition' => 'attachment; filename="'.$type.'.csv"']];
 
         $callback = function () use ($type) {
             $handle = fopen('php://output', 'w');

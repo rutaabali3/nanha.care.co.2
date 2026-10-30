@@ -48,7 +48,7 @@ class BabysittersController extends Controller
     {
         $babysitter = $this->babysitterService->getById((int) $id);
 
-        abort_if(!$babysitter, 404);
+        abort_if(! $babysitter, 404);
 
         return view('babysitters.profile', compact('babysitter'));
     }

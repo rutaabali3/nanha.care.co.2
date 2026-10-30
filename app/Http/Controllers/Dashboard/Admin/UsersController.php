@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CreateUserRequest;
 use App\Models\System\RoleAssignmentLog;
 use App\Models\User;
+use App\Notifications\AccountSuspended;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -20,7 +21,7 @@ class UsersController extends Controller
         $filters = [];
 
         if ($request->filled('role')) {
-            $query->whereHas('roles', fn($q) => $q->where('name', $request->role));
+            $query->whereHas('roles', fn ($q) => $q->where('name', $request->role));
             $filters['role'] = $request->role;
         }
 
@@ -112,7 +113,7 @@ class UsersController extends Controller
             'new_role' => UserStatus::Suspended->value,
         ]);
 
-        $user->notify(new \App\Notifications\AccountSuspended());
+        $user->notify(new AccountSuspended);
 
         return redirect()->back()->with('success', 'User suspended successfully.');
     }

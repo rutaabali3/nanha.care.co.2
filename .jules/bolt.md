@@ -1,0 +1,3 @@
+## 2026-10-30 - Batch 12-Month Query Loops into Single Date Range Query
+**Learning:** Sequential loops executing individual monthly aggregate queries (e.g., `whereYear('date', $year)->whereMonth('date', $month)->sum(...)` over 12 iterations) cause 12 database roundtrips per request. Fetching the full 12-month window in a single query with `whereBetween` and performing collection grouping/summing in PHP reduces DB queries from 12 to 1 and speeds up the endpoint ~5x.
+**Action:** When calculating monthly chart/aggregate data in controllers or services, prefer querying the whole date range at once and grouping in PHP instead of querying per-month inside a loop.

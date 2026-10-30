@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Contracts\INotificationService;
 use App\Models\System\Notification;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 
 class NotificationService implements INotificationService
@@ -40,7 +39,7 @@ class NotificationService implements INotificationService
     public function broadcast(array $roles, string $message, ?string $link = null): void
     {
         $userIds = User::role($roles)->pluck('id');
-        $notifications = $userIds->map(fn($userId) => [
+        $notifications = $userIds->map(fn ($userId) => [
             'user_id' => $userId,
             'type' => 'broadcast',
             'message' => $message,

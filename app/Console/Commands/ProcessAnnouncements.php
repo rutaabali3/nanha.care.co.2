@@ -8,6 +8,7 @@ use Illuminate\Console\Command;
 class ProcessAnnouncements extends Command
 {
     protected $signature = 'nanhacare:process-announcements';
+
     protected $description = 'Process scheduled announcements';
 
     public function handle(): void

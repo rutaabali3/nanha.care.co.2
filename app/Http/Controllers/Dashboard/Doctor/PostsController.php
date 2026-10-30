@@ -22,6 +22,7 @@ class PostsController
     {
         $status = $request->get('status');
         $posts = $this->blogService->getByDoctor(auth()->id(), $status);
+
         return view('dashboard.doctor.posts.index', compact('posts', 'status'));
     }
 
@@ -49,7 +50,7 @@ class PostsController
         if ($status === ContentStatus::UnderReview) {
             $this->notificationService->broadcast(
                 ['moderator'],
-                'New blog post submitted for review: ' . $post->title,
+                'New blog post submitted for review: '.$post->title,
                 route('moderator.queue.index', ['type' => 'blog_post'])
             );
         }
@@ -64,6 +65,7 @@ class PostsController
     public function edit($id)
     {
         $post = BlogPost::where('doctor_id', auth()->id())->findOrFail($id);
+
         return view('dashboard.doctor.posts.edit', compact('post'));
     }
 

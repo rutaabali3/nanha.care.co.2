@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Contracts\IOnboardingService;
 use App\Contracts\IFileUploadService;
+use App\Contracts\IOnboardingService;
 use App\Models\Marketplace\Shop;
 use App\Models\Profiles\BabysitterProfile;
 use App\Models\Profiles\DoctorProfile;
@@ -37,7 +37,7 @@ class OnboardingService implements IOnboardingService
             unset($data['profile_photo']);
         }
 
-        if (!empty($userUpdate)) {
+        if (! empty($userUpdate)) {
             $user->update($userUpdate);
         }
 
@@ -46,7 +46,8 @@ class OnboardingService implements IOnboardingService
             unset($data['experience']);
         }
         unset($data['full_name'], $data['email'], $data['phone'], $data['city'], $data['dob'],
-              $data['cnic_front'], $data['cnic_back'], $data['police_clearance'], $data['training_cert']);
+            $data['cnic_front'], $data['cnic_back'], $data['police_clearance'], $data['training_cert']);
+
         return BabysitterProfile::create(array_merge($data, ['user_id' => $userId]));
     }
 
@@ -68,7 +69,7 @@ class OnboardingService implements IOnboardingService
             $userUpdate['avatar'] = $this->fileUpload->save($data['profile_photo'], 'avatars');
         }
 
-        if (!empty($userUpdate)) {
+        if (! empty($userUpdate)) {
             $user->update($userUpdate);
         }
 
@@ -82,7 +83,7 @@ class OnboardingService implements IOnboardingService
         }
         if (isset($data['shop_name'])) {
             $data['name'] = $data['shop_name'];
-            $data['slug'] = Str::slug($data['shop_name']) . '-' . $userId;
+            $data['slug'] = Str::slug($data['shop_name']).'-'.$userId;
             unset($data['shop_name']);
         }
         if (isset($data['shop_description'])) {
@@ -97,7 +98,8 @@ class OnboardingService implements IOnboardingService
             $data['category'] = $data['categories'];
         }
         unset($data['full_name'], $data['email'], $data['phone'], $data['city'], $data['profile_photo'],
-              $data['business_license'], $data['categories']);
+            $data['business_license'], $data['categories']);
+
         return Shop::updateOrCreate(['user_id' => $userId], $data);
     }
 
@@ -120,7 +122,7 @@ class OnboardingService implements IOnboardingService
             $userUpdate['name'] = $data['full_name'];
         }
 
-        if (!empty($userUpdate)) {
+        if (! empty($userUpdate)) {
             $user->update($userUpdate);
         }
 
@@ -128,7 +130,7 @@ class OnboardingService implements IOnboardingService
             $data['hospital'] = $data['clinic_name'];
             unset($data['clinic_name']);
         }
-        if (!isset($data['license_number']) && isset($data['pmdc_number'])) {
+        if (! isset($data['license_number']) && isset($data['pmdc_number'])) {
             $data['license_number'] = $data['pmdc_number'];
         }
         if (isset($data['medical_license'])) {
@@ -141,7 +143,8 @@ class OnboardingService implements IOnboardingService
             $data['cv'] = $this->fileUpload->save($data['cv'], 'doctor-documents');
         }
         unset($data['full_name'], $data['email'], $data['phone'], $data['city'],
-              $data['years_experience'], $data['clinic_address']);
+            $data['years_experience'], $data['clinic_address']);
+
         return DoctorProfile::create(array_merge($data, ['user_id' => $userId]));
     }
 
@@ -163,7 +166,7 @@ class OnboardingService implements IOnboardingService
             $updateData['avatar'] = $this->fileUpload->save($data['profile_photo'], 'avatars');
         }
 
-        if (!empty($updateData)) {
+        if (! empty($updateData)) {
             $user->update($updateData);
         }
 

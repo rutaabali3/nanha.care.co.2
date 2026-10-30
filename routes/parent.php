@@ -1,13 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Dashboard\Parent\DashboardController;
 use App\Http\Controllers\Dashboard\Parent\BookingsController;
-use App\Http\Controllers\Dashboard\Parent\OrdersController;
-use App\Http\Controllers\Dashboard\Parent\ChildrenController;
-use App\Http\Controllers\Dashboard\Parent\SavedBabysittersController;
 use App\Http\Controllers\Dashboard\Parent\BookmarksController;
+use App\Http\Controllers\Dashboard\Parent\ChildrenController;
+use App\Http\Controllers\Dashboard\Parent\DashboardController;
+use App\Http\Controllers\Dashboard\Parent\OrdersController;
+use App\Http\Controllers\Dashboard\Parent\SavedBabysittersController;
 use App\Http\Controllers\Dashboard\Parent\SettingsController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('/dashboard/parent')->middleware(['auth', 'role:parent', 'onboarded'])->group(function () {
 

@@ -6,7 +6,7 @@ class CurrencyHelper
 {
     public static function formatPkr(float $amount): string
     {
-        return 'Rs. ' . number_format($amount, 0);
+        return 'Rs. '.number_format($amount, 0);
     }
 
     public static function calculateCommission(float $amount, float $percent): float

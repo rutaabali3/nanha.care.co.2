@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Dashboard\Support\DashboardController;
-use App\Http\Controllers\Dashboard\Support\TicketsController;
-use App\Http\Controllers\Dashboard\Support\FaqsController;
 use App\Http\Controllers\Dashboard\Support\EscalationsController;
+use App\Http\Controllers\Dashboard\Support\FaqsController;
+use App\Http\Controllers\Dashboard\Support\TicketsController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('/dashboard/support')->middleware(['auth', 'role:support_agent'])->group(function () {
 

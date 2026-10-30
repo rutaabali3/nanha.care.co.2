@@ -2,12 +2,11 @@
 
 namespace App\Services;
 
-use App\Contracts\ISupportTicketService;
 use App\Contracts\IEmailService;
-use App\Enums\TicketStatus;
+use App\Contracts\ISupportTicketService;
 use App\Enums\TicketPriority;
+use App\Enums\TicketStatus;
 use App\Models\Support\SupportTicket;
-use App\Models\Support\TicketReply;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class SupportTicketService implements ISupportTicketService
@@ -20,16 +19,16 @@ class SupportTicketService implements ISupportTicketService
     {
         $query = SupportTicket::with('user', 'agent');
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
-        if (!empty($filters['priority'])) {
+        if (! empty($filters['priority'])) {
             $query->where('priority', $filters['priority']);
         }
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $query->where(function ($q) use ($filters) {
-                $q->where('subject', 'like', '%' . $filters['search'] . '%')
-                  ->orWhereHas('user', fn($u) => $u->where('name', 'like', '%' . $filters['search'] . '%'));
+                $q->where('subject', 'like', '%'.$filters['search'].'%')
+                    ->orWhereHas('user', fn ($u) => $u->where('name', 'like', '%'.$filters['search'].'%'));
             });
         }
 
@@ -65,7 +64,7 @@ class SupportTicketService implements ISupportTicketService
             $ticket->update(['status' => TicketStatus::Open]);
         }
 
-        if (!$isInternal) {
+        if (! $isInternal) {
             $this->email->sendContactReply($ticket->id);
         }
     }

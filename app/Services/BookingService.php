@@ -3,12 +3,11 @@
 namespace App\Services;
 
 use App\Contracts\IBookingService;
-use App\Contracts\INotificationService;
 use App\Contracts\IEmailService;
+use App\Contracts\INotificationService;
 use App\Enums\BookingStatus;
 use App\Enums\VerifiedStatus;
 use App\Models\Babysitting\Booking;
-use App\Models\Babysitting\BookingChild;
 use App\Models\Profiles\BabysitterProfile;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -28,6 +27,7 @@ class BookingService implements IBookingService
         if ($status) {
             $query->where('status', $status);
         }
+
         return $query->orderByDesc('created_at')->paginate(10);
     }
 
@@ -38,6 +38,7 @@ class BookingService implements IBookingService
         if ($status) {
             $query->where('status', $status);
         }
+
         return $query->orderByDesc('created_at')->paginate(10);
     }
 
@@ -47,11 +48,11 @@ class BookingService implements IBookingService
             ->where('verified_status', VerifiedStatus::Verified)
             ->first();
 
-        if (!$profile) {
+        if (! $profile) {
             throw new \InvalidArgumentException('Babysitter is not verified.');
         }
 
-        return DB::transaction(function () use ($data, $profile) {
+        return DB::transaction(function () use ($data) {
             $booking = Booking::create([
                 'parent_id' => $data['parent_id'],
                 'babysitter_id' => $data['babysitter_id'],
@@ -71,7 +72,7 @@ class BookingService implements IBookingService
             $this->notification->send(
                 $data['babysitter_id'],
                 'new_booking',
-                "New booking request from " . ($booking->parent->name ?? 'a parent'),
+                'New booking request from '.($booking->parent->name ?? 'a parent'),
             );
 
             return $booking->load('parent', 'bookingChildren.child');
@@ -82,7 +83,7 @@ class BookingService implements IBookingService
     {
         $booking = Booking::findOrFail($id);
         if ($booking->babysitter_id !== $userId) {
-            throw new AuthorizationException();
+            throw new AuthorizationException;
         }
         $booking->update(['status' => BookingStatus::Confirmed]);
 
@@ -98,7 +99,7 @@ class BookingService implements IBookingService
     {
         $booking = Booking::findOrFail($id);
         if ($booking->babysitter_id !== $userId) {
-            throw new AuthorizationException();
+            throw new AuthorizationException;
         }
         $booking->update([
             'status' => BookingStatus::Cancelled,
@@ -116,7 +117,7 @@ class BookingService implements IBookingService
     {
         $booking = Booking::findOrFail($id);
         if ($booking->babysitter_id !== $userId) {
-            throw new AuthorizationException();
+            throw new AuthorizationException;
         }
         $booking->update(['status' => BookingStatus::Completed]);
 

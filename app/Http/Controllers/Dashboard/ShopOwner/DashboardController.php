@@ -13,6 +13,7 @@ class DashboardController
     public function index()
     {
         $data = $this->service->getShopOwnerOverview(auth()->id());
+
         return view('dashboard.shop-owner.index', ['overview' => $data]);
     }
 }

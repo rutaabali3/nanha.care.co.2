@@ -6,7 +6,7 @@ class FileHelper
 {
     public static function getPublicPath(string $storagePath): string
     {
-        return asset('storage/' . ltrim($storagePath, '/'));
+        return asset('storage/'.ltrim($storagePath, '/'));
     }
 
     public static function getPlaceholder(string $type): string
@@ -23,13 +23,13 @@ class FileHelper
     public static function formatSize(int $bytes): string
     {
         if ($bytes >= 1048576) {
-            return number_format($bytes / 1048576, 2) . ' MB';
+            return number_format($bytes / 1048576, 2).' MB';
         }
 
         if ($bytes >= 1024) {
-            return number_format($bytes / 1024, 2) . ' KB';
+            return number_format($bytes / 1024, 2).' KB';
         }
 
-        return $bytes . ' B';
+        return $bytes.' B';
     }
 }

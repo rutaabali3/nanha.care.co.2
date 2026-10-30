@@ -1,12 +1,12 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Dashboard\Moderator\DashboardController;
-use App\Http\Controllers\Dashboard\Moderator\QueueController;
-use App\Http\Controllers\Dashboard\Moderator\PublishedController;
-use App\Http\Controllers\Dashboard\Moderator\FlaggedController;
-use App\Http\Controllers\Dashboard\Moderator\ReportsController;
 use App\Http\Controllers\Dashboard\Moderator\ActivityController;
+use App\Http\Controllers\Dashboard\Moderator\DashboardController;
+use App\Http\Controllers\Dashboard\Moderator\FlaggedController;
+use App\Http\Controllers\Dashboard\Moderator\PublishedController;
+use App\Http\Controllers\Dashboard\Moderator\QueueController;
+use App\Http\Controllers\Dashboard\Moderator\ReportsController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('/dashboard/moderator')->middleware(['auth', 'role:moderator'])->group(function () {
 

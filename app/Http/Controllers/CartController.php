@@ -16,7 +16,7 @@ class CartController extends Controller
     public function index()
     {
         $cart = session('nanhacare_cart', []);
-        $subtotal = collect($cart)->sum(fn($item) => $item['price'] * $item['qty']);
+        $subtotal = collect($cart)->sum(fn ($item) => $item['price'] * $item['qty']);
 
         return view('cart.index', compact('cart', 'subtotal'));
     }
@@ -55,7 +55,7 @@ class CartController extends Controller
         $request->validate(['product_id' => 'required']);
 
         $cart = collect(session('nanhacare_cart', []))
-            ->filter(fn($i) => $i['product_id'] != $request->product_id)
+            ->filter(fn ($i) => $i['product_id'] != $request->product_id)
             ->values()
             ->toArray();
 
@@ -92,7 +92,7 @@ class CartController extends Controller
             return redirect('/cart')->with('error', 'Your cart is empty');
         }
 
-        $total = collect($cart)->sum(fn($i) => $i['price'] * $i['qty']);
+        $total = collect($cart)->sum(fn ($i) => $i['price'] * $i['qty']);
 
         return view('cart.checkout', compact('cart', 'total'));
     }

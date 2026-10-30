@@ -15,12 +15,14 @@ class BookingsController
     {
         $tab = $request->get('tab', 'pending');
         $bookings = $this->service->getByBabysitter(auth()->id(), $tab);
+
         return view('dashboard.babysitter.bookings.index', compact('bookings', 'tab'));
     }
 
     public function accept($id)
     {
         $this->service->accept($id, auth()->id());
+
         return redirect()->back()->with('success', 'Booking accepted successfully.');
     }
 
@@ -28,12 +30,14 @@ class BookingsController
     {
         $request->validate(['reason' => 'required|string']);
         $this->service->decline($id, auth()->id(), $request->reason);
+
         return redirect()->back()->with('success', 'Booking declined.');
     }
 
     public function complete($id)
     {
         $this->service->complete($id, auth()->id());
+
         return redirect()->back()->with('success', 'Booking completed.');
     }
 }
