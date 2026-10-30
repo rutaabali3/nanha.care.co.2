@@ -16,7 +16,7 @@ class SendBookingNotification
         $this->notificationService->send(
             $booking->babysitter_id,
             'booking_request',
-            'New booking request for ' . ($booking->babysitter->name ?? 'you')
+            'New booking request for '.($booking->babysitter->name ?? 'you')
         );
     }
 
@@ -26,7 +26,7 @@ class SendBookingNotification
         $this->notificationService->send(
             $booking->parent_id,
             'booking_accepted',
-            'Your booking has been accepted by ' . ($booking->babysitter->name ?? 'the babysitter')
+            'Your booking has been accepted by '.($booking->babysitter->name ?? 'the babysitter')
         );
     }
 

@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Contracts\IDashboardService;
-use App\Models\Babysitting\Booking;
 use App\Models\Babysitting\BabysitterReview;
+use App\Models\Babysitting\Booking;
 use App\Models\Blog\BlogPost;
 use App\Models\Marketplace\Order;
 use App\Models\Marketplace\Product;
@@ -17,7 +17,6 @@ use App\Models\System\ModerationLog;
 use App\Models\System\RoleAssignmentLog;
 use App\Models\System\UserReport;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 
 class DashboardService implements IDashboardService
@@ -45,15 +44,15 @@ class DashboardService implements IDashboardService
                     'open_tickets' => $openTickets,
                 ],
                 'recentActivity' => collect()
-                    ->concat(ModerationLog::with('moderator')->orderByDesc('created_at')->take(5)->get()->map(fn($log) => [
+                    ->concat(ModerationLog::with('moderator')->orderByDesc('created_at')->take(5)->get()->map(fn ($log) => [
                         'type' => 'Moderation',
-                        'action' => ucfirst($log->action) . ' on ' . class_basename($log->target_type) . ' #' . $log->target_id,
+                        'action' => ucfirst($log->action).' on '.class_basename($log->target_type).' #'.$log->target_id,
                         'user_name' => $log->moderator?->name ?? 'Unknown',
                         'timestamp' => $log->submitted_at ?? $log->created_at,
                     ]))
-                    ->concat(RoleAssignmentLog::with('admin')->orderByDesc('created_at')->take(5)->get()->map(fn($log) => [
+                    ->concat(RoleAssignmentLog::with('admin')->orderByDesc('created_at')->take(5)->get()->map(fn ($log) => [
                         'type' => 'Role Assignment',
-                        'action' => 'Changed role to ' . $log->new_role,
+                        'action' => 'Changed role to '.$log->new_role,
                         'user_name' => $log->admin?->name ?? 'Unknown',
                         'timestamp' => $log->created_at,
                     ]))
@@ -144,28 +143,28 @@ class DashboardService implements IDashboardService
             return [
                 'shop' => $shop,
                 'total_products' => $shopId ? Product::where('shop_id', $shopId)->count() : 0,
-                'total_orders' => $shopId ? Order::whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))->count() : 0,
+                'total_orders' => $shopId ? Order::whereHas('items.product', fn ($q) => $q->where('shop_id', $shopId))->count() : 0,
                 'pending_orders' => $shopId
-                    ? Order::whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))
+                    ? Order::whereHas('items.product', fn ($q) => $q->where('shop_id', $shopId))
                         ->where('status', 'pending')
                         ->count()
                     : 0,
                 'total_revenue' => $shopId
-                    ? (float) Order::whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))
+                    ? (float) Order::whereHas('items.product', fn ($q) => $q->where('shop_id', $shopId))
                         ->where('status', 'delivered')
                         ->sum('total')
                     : 0,
                 'avg_rating' => $shopId
-                    ? ProductReview::whereHas('product', fn($q) => $q->where('shop_id', $shopId))
+                    ? ProductReview::whereHas('product', fn ($q) => $q->where('shop_id', $shopId))
                         ->avg('rating')
                     : 0,
                 'total_reviews' => $shopId
-                    ? ProductReview::whereHas('product', fn($q) => $q->where('shop_id', $shopId))
+                    ? ProductReview::whereHas('product', fn ($q) => $q->where('shop_id', $shopId))
                         ->count()
                     : 0,
                 'recent_orders' => $shopId
                     ? Order::with('parent', 'items.product')
-                        ->whereHas('items.product', fn($q) => $q->where('shop_id', $shopId))
+                        ->whereHas('items.product', fn ($q) => $q->where('shop_id', $shopId))
                         ->orderByDesc('created_at')
                         ->take(5)
                         ->get()

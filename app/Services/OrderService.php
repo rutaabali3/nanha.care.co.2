@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use App\Contracts\IOrderService;
-use App\Contracts\INotificationService;
 use App\Contracts\IEmailService;
+use App\Contracts\INotificationService;
+use App\Contracts\IOrderService;
+use App\Enums\OrderStatus;
 use App\Models\Marketplace\Order;
-use App\Models\Marketplace\OrderItem;
 use App\Models\Marketplace\Product;
 use App\Models\Marketplace\ReturnRequest;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -30,7 +30,7 @@ class OrderService implements IOrderService
     public function getByShopOwner(string $userId): LengthAwarePaginator
     {
         return Order::with('items.product', 'parent')
-            ->whereHas('items.product.shop', fn($q) => $q->where('user_id', $userId))
+            ->whereHas('items.product.shop', fn ($q) => $q->where('user_id', $userId))
             ->orderByDesc('created_at')
             ->paginate(10);
     }
@@ -58,7 +58,7 @@ class OrderService implements IOrderService
                 'parent_id' => $userId,
                 'shipping_address' => $data['shipping_address'],
                 'payment_method' => $data['payment_method'],
-                'status' => \App\Enums\OrderStatus::Processing,
+                'status' => OrderStatus::Processing,
                 'total' => $total,
             ]);
 
@@ -74,7 +74,7 @@ class OrderService implements IOrderService
 
     public function updateStatus(int $id, string $status, string $userId): void
     {
-        $order = Order::whereHas('items.product.shop', fn($q) => $q->where('user_id', $userId))
+        $order = Order::whereHas('items.product.shop', fn ($q) => $q->where('user_id', $userId))
             ->findOrFail($id);
         $order->update(['status' => $status]);
 

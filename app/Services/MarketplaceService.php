@@ -17,22 +17,22 @@ class MarketplaceService implements IMarketplaceService
         $query = Product::with('shop', 'images')
             ->where('status', ContentStatus::Published);
 
-        if (!empty($filters['category'])) {
+        if (! empty($filters['category'])) {
             $query->where('category', $filters['category']);
         }
-        if (!empty($filters['min_price'])) {
+        if (! empty($filters['min_price'])) {
             $query->where('price', '>=', $filters['min_price']);
         }
-        if (!empty($filters['max_price'])) {
+        if (! empty($filters['max_price'])) {
             $query->where('price', '<=', $filters['max_price']);
         }
-        if (!empty($filters['search'])) {
-            $query->where('name', 'like', '%' . $filters['search'] . '%');
+        if (! empty($filters['search'])) {
+            $query->where('name', 'like', '%'.$filters['search'].'%');
         }
-        if (!empty($filters['age_tag'])) {
+        if (! empty($filters['age_tag'])) {
             $query->whereJsonContains('age_tags', $filters['age_tag']);
         }
-        if (!empty($filters['shop_id'])) {
+        if (! empty($filters['shop_id'])) {
             $query->where('shop_id', $filters['shop_id']);
         }
 
@@ -57,12 +57,13 @@ class MarketplaceService implements IMarketplaceService
     public function getRelatedProducts(int $productId): Collection
     {
         $product = Product::findOrFail($productId);
+
         return Product::with('shop', 'images')
             ->where('id', '!=', $productId)
             ->where('status', ContentStatus::Published)
             ->where(function ($q) use ($product) {
                 $q->where('category', $product->category)
-                  ->orWhere('shop_id', $product->shop_id);
+                    ->orWhere('shop_id', $product->shop_id);
             })
             ->inRandomOrder()
             ->take(4)

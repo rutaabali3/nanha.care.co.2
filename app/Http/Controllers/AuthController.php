@@ -36,7 +36,7 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        if (!Auth::attempt($credentials, $request->boolean('remember'))) {
+        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             return back()->withErrors(['email' => 'Invalid credentials']);
         }
 
@@ -44,15 +44,17 @@ class AuthController extends Controller
 
         if ($user->status === UserStatus::Banned) {
             Auth::logout();
+
             return redirect()->route('auth.suspended');
         }
 
-        if (!$user->hasVerifiedEmail()) {
+        if (! $user->hasVerifiedEmail()) {
             Auth::logout();
+
             return redirect()->route('auth.check-email')->with('info', 'Please verify your email before logging in.');
         }
 
-        if (!$user->getRoleNames()->first()) {
+        if (! $user->getRoleNames()->first()) {
             return redirect()->route('auth.choose-role');
         }
 
@@ -97,7 +99,7 @@ class AuthController extends Controller
     {
         $user = User::findOrFail($request->route('id'));
 
-        if (!hash_equals((string) $request->route('hash'), sha1($user->getEmailForVerification()))) {
+        if (! hash_equals((string) $request->route('hash'), sha1($user->getEmailForVerification()))) {
             abort(403);
         }
 
@@ -108,13 +110,13 @@ class AuthController extends Controller
         Auth::login($user);
 
         $roleName = $user->getRoleNames()->first();
-        if (!$roleName) {
+        if (! $roleName) {
             return redirect()->route('auth.choose-role');
         }
 
         $role = str_replace('_', '-', $roleName);
 
-        return redirect()->route('onboarding.' . $role);
+        return redirect()->route('onboarding.'.$role);
     }
 
     public function checkEmail()
@@ -214,9 +216,9 @@ class AuthController extends Controller
         }
 
         $user->assignRole($request->role);
-        
+
         $roleSlug = str_replace('_', '-', $request->role);
 
-        return redirect()->route('onboarding.' . $roleSlug);
+        return redirect()->route('onboarding.'.$roleSlug);
     }
 }

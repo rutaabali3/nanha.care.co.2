@@ -22,7 +22,7 @@ class PublishedController extends Controller
 
     public function unpublish(string $type, int $id)
     {
-        $targetClass = 'App\\Models\\' . $type;
+        $targetClass = 'App\\Models\\'.$type;
         $target = $targetClass::findOrFail($id);
         $target->update(['status' => ContentStatus::Archived]);
 

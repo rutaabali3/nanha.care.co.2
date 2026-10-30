@@ -11,6 +11,7 @@ class NotificationsController
         $notifications = Notification::where('user_id', auth()->id())
             ->orderByDesc('created_at')
             ->paginate(20);
+
         return view('dashboard.babysitter.notifications.index', compact('notifications'));
     }
 }

@@ -24,7 +24,7 @@ class BlogController extends Controller
     {
         $post = $this->blogService->getBySlug($slug);
 
-        abort_if(!$post, 404);
+        abort_if(! $post, 404);
 
         PostViewLog::create([
             'blog_post_id' => $post->id,
@@ -42,8 +42,8 @@ class BlogController extends Controller
 
     public function addComment(Request $request, $id)
     {
-        abort_if(!auth()->check(), 401);
-        abort_if(!auth()->user()->hasRole('parent'), 403);
+        abort_if(! auth()->check(), 401);
+        abort_if(! auth()->user()->hasRole('parent'), 403);
 
         $request->validate(['content' => 'required|string|min:3|max:500']);
 

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Dashboard\ShopOwner;
 
-use App\Models\Marketplace\Product;
 use App\Models\Marketplace\ProductReview;
 use App\Models\System\FlaggedItem;
 use Illuminate\Http\Request;

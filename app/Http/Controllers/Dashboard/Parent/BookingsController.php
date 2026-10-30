@@ -19,6 +19,7 @@ class BookingsController
     {
         $tab = $request->get('tab', 'upcoming');
         $bookings = $this->service->getByParent(auth()->id(), $tab);
+
         return view('dashboard.parent.bookings.index', compact('bookings', 'tab'));
     }
 

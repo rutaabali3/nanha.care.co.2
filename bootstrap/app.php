@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\BanCheckMiddleware;
+use App\Http\Middleware\EnsureOnboardingCompleted;
 use App\Http\Middleware\MaintenanceModeMiddleware;
 use App\Http\Middleware\RoleAreaGuardMiddleware;
 use App\Providers\EventServiceProvider;
@@ -8,6 +9,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -22,8 +24,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'maintenance' => MaintenanceModeMiddleware::class,
             'bancheck' => BanCheckMiddleware::class,
             'rolearea' => RoleAreaGuardMiddleware::class,
-            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'onboarded' => \App\Http\Middleware\EnsureOnboardingCompleted::class,
+            'role' => RoleMiddleware::class,
+            'onboarded' => EnsureOnboardingCompleted::class,
         ]);
 
         $middleware->append([

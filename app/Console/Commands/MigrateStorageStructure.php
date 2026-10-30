@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 class MigrateStorageStructure extends Command
 {
     protected $signature = 'nanhacare:migrate-storage';
+
     protected $description = 'Migrate files from user-ID-based folders to a flat UUID-based structure';
 
     private array $mappings;
@@ -63,7 +64,7 @@ class MigrateStorageStructure extends Command
         $updated = 0;
 
         foreach ($this->mappings as $category => $dbColumns) {
-            if (!$disk->exists($category)) {
+            if (! $disk->exists($category)) {
                 continue;
             }
 
@@ -72,7 +73,7 @@ class MigrateStorageStructure extends Command
             foreach ($items as $dir) {
                 $dirName = basename($dir);
 
-                if (!is_numeric($dirName)) {
+                if (! is_numeric($dirName)) {
                     continue;
                 }
 
@@ -81,8 +82,8 @@ class MigrateStorageStructure extends Command
                 foreach ($files as $oldPath) {
                     $filename = basename($oldPath);
                     $ext = pathinfo($filename, PATHINFO_EXTENSION);
-                    $newFilename = Str::uuid() . ($ext ? '.' . $ext : '');
-                    $newPath = $category . '/' . $newFilename;
+                    $newFilename = Str::uuid().($ext ? '.'.$ext : '');
+                    $newPath = $category.'/'.$newFilename;
 
                     $disk->move($oldPath, $newPath);
 

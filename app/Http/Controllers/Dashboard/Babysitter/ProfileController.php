@@ -18,6 +18,7 @@ class ProfileController
     {
         $profile = BabysitterProfile::where('user_id', auth()->id())->first();
         $completion = $this->babysitterService->getCompletionPercentage(auth()->id());
+
         return view('dashboard.babysitter.profile.index', compact('profile', 'completion'));
     }
 

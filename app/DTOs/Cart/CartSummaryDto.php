@@ -19,7 +19,7 @@ readonly class CartSummaryDto
             $items[] = CartItemDto::fromArray($data);
         }
 
-        $subtotal = array_reduce($items, fn(float $carry, CartItemDto $item) => $carry + $item->total(), 0.0);
+        $subtotal = array_reduce($items, fn (float $carry, CartItemDto $item) => $carry + $item->total(), 0.0);
         $tax = round($subtotal * 0.05, 2);
         $total = round($subtotal + $tax, 2);
 

@@ -8,6 +8,7 @@ use App\Models\Babysitting\Child;
 use App\Models\Babysitting\SavedBabysitter;
 use App\Models\Blog\BlogBookmark;
 use App\Models\Marketplace\Order;
+use App\Models\Marketplace\Shop;
 use App\Models\Profiles\BabysitterProfile;
 use App\Models\Profiles\DoctorProfile;
 use App\Models\Profiles\ParentProfile;
@@ -55,13 +56,13 @@ class User extends Authenticatable
 
     public function shop()
     {
-        return $this->hasOne(\App\Models\Marketplace\Shop::class, 'user_id');
+        return $this->hasOne(Shop::class, 'user_id');
     }
 
     public function hasCompletedOnboarding(): bool
     {
         $role = $this->getRoleNames()->first();
-        if (!$role) {
+        if (! $role) {
             return false;
         }
 
@@ -77,12 +78,13 @@ class User extends Authenticatable
     public function onboardingRoute(): string
     {
         $role = $this->getRoleNames()->first();
-        if (!$role) {
+        if (! $role) {
             return route('auth.choose-role');
         }
 
         $roleSlug = str_replace('_', '-', $role);
-        return route('onboarding.' . $roleSlug);
+
+        return route('onboarding.'.$roleSlug);
     }
 
     public function parentBookings()

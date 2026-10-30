@@ -14,7 +14,7 @@ class SlugHelper
         $counter = 1;
 
         while (DB::table($model)->where($column, $slug)->exists()) {
-            $slug = $original . '-' . $counter++;
+            $slug = $original.'-'.$counter++;
         }
 
         return $slug;
@@ -37,7 +37,7 @@ class SlugHelper
         }
 
         while ($query->exists()) {
-            $slug = $original . '-' . $counter++;
+            $slug = $original.'-'.$counter++;
             $query = $model::where('slug', $slug);
             if ($ignoreId !== null) {
                 $query->where('id', '!=', $ignoreId);

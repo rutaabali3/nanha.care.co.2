@@ -12,10 +12,11 @@ class EnsureOnboardingCompleted
     {
         if (auth()->check()) {
             $user = auth()->user();
-            if (!$user->hasCompletedOnboarding()) {
+            if (! $user->hasCompletedOnboarding()) {
                 if ($request->expectsJson()) {
                     return response()->json(['error' => 'Onboarding not completed. Please complete registration.'], 403);
                 }
+
                 return redirect($user->onboardingRoute());
             }
         }

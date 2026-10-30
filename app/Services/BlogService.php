@@ -4,10 +4,11 @@ namespace App\Services;
 
 use App\Contracts\IBlogService;
 use App\Enums\ContentStatus;
+use App\Helpers\SlugHelper;
 use App\Models\Blog\BlogPost;
 use App\Models\Blog\Comment;
-use App\Helpers\SlugHelper;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 class BlogService implements IBlogService
 {
@@ -15,13 +16,13 @@ class BlogService implements IBlogService
     {
         $query = BlogPost::with('doctor')->where('status', ContentStatus::Published);
 
-        if (!empty($filters['category'])) {
+        if (! empty($filters['category'])) {
             $query->where('category', $filters['category']);
         }
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $query->where(function ($q) use ($filters) {
-                $q->where('title', 'like', '%' . $filters['search'] . '%')
-                  ->orWhere('content', 'like', '%' . $filters['search'] . '%');
+                $q->where('title', 'like', '%'.$filters['search'].'%')
+                    ->orWhere('content', 'like', '%'.$filters['search'].'%');
             });
         }
 
@@ -42,6 +43,7 @@ class BlogService implements IBlogService
         if ($status) {
             $query->where('status', $status);
         }
+
         return $query->orderByDesc('created_at')->paginate(10);
     }
 
@@ -49,6 +51,7 @@ class BlogService implements IBlogService
     {
         $data['slug'] = SlugHelper::unique(BlogPost::class, $data['title']);
         $data['doctor_id'] = $userId;
+
         return BlogPost::create($data);
     }
 
@@ -59,6 +62,7 @@ class BlogService implements IBlogService
             $data['slug'] = SlugHelper::unique(BlogPost::class, $data['title'], $id);
         }
         $post->update($data);
+
         return $post->fresh();
     }
 
@@ -71,7 +75,7 @@ class BlogService implements IBlogService
         ]);
     }
 
-    public function getRelatedPosts(BlogPost $post, int $limit = 3): \Illuminate\Database\Eloquent\Collection
+    public function getRelatedPosts(BlogPost $post, int $limit = 3): Collection
     {
         return BlogPost::with('doctor')
             ->where('status', ContentStatus::Published)

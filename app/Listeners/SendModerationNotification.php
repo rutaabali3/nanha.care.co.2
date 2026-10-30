@@ -14,7 +14,7 @@ class SendModerationNotification
     {
         $this->notificationService->broadcast(
             ['moderator'],
-            'New product pending review: ' . ($event->product->name ?? 'Unknown')
+            'New product pending review: '.($event->product->name ?? 'Unknown')
         );
     }
 
@@ -22,7 +22,7 @@ class SendModerationNotification
     {
         $this->notificationService->broadcast(
             ['moderator'],
-            'New blog post pending review: ' . ($event->post->title ?? 'Unknown')
+            'New blog post pending review: '.($event->post->title ?? 'Unknown')
         );
     }
 

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Dashboard\Moderator;
 
 use App\Http\Controllers\Controller;
 use App\Models\System\UserReport;
-use App\Models\User;
+use App\Notifications\WarningNotification;
 use Illuminate\Http\Request;
 
 class ReportsController extends Controller
@@ -27,7 +27,7 @@ class ReportsController extends Controller
         $report = UserReport::findOrFail($id);
         $subject = $report->subject;
 
-        $subject->notify(new \App\Notifications\WarningNotification($request->input('message', 'You have received a warning.')));
+        $subject->notify(new WarningNotification($request->input('message', 'You have received a warning.')));
 
         $report->update(['status' => 'actioned']);
 

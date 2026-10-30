@@ -1,11 +1,11 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Dashboard\Doctor\AnalyticsController;
+use App\Http\Controllers\Dashboard\Doctor\CommentsController;
 use App\Http\Controllers\Dashboard\Doctor\DashboardController;
 use App\Http\Controllers\Dashboard\Doctor\PostsController;
-use App\Http\Controllers\Dashboard\Doctor\CommentsController;
-use App\Http\Controllers\Dashboard\Doctor\AnalyticsController;
 use App\Http\Controllers\Dashboard\Doctor\ProfileController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('/dashboard/doctor')->middleware(['auth', 'role:doctor', 'onboarded'])->group(function () {
 

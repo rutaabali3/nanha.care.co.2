@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Dashboard\ShopOwner;
 use App\Contracts\IFileUploadService;
 use App\Contracts\IProductService;
 use App\Enums\ContentStatus;
-use App\Models\Marketplace\Product;
-use Illuminate\Http\Request;
 use App\Http\Requests\Products\CreateProductRequest;
 use App\Http\Requests\Products\EditProductRequest;
+use App\Models\Marketplace\Product;
+use Illuminate\Http\Request;
 
 class ProductsController
 {
@@ -21,6 +21,7 @@ class ProductsController
     {
         $filters = $request->only(['category', 'status', 'search']);
         $products = $this->service->getByShopOwner(auth()->id(), $filters);
+
         return view('dashboard.shop-owner.products.index', compact('products'));
     }
 

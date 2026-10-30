@@ -10,7 +10,8 @@ class FileUploadService implements IFileUploadService
 {
     public function save(mixed $file, string $category): string
     {
-        $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+        $filename = Str::uuid().'.'.$file->getClientOriginalExtension();
+
         return $file->storeAs($category, $filename, 'public');
     }
 

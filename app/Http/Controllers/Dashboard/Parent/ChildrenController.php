@@ -26,7 +26,7 @@ class ChildrenController
             'special_needs' => 'nullable|string|max:1000',
         ]);
 
-        $allergies = !empty($validated['allergies'])
+        $allergies = ! empty($validated['allergies'])
             ? array_map('trim', explode(',', $validated['allergies']))
             : [];
 
@@ -55,7 +55,7 @@ class ChildrenController
             'special_needs' => 'nullable|string|max:1000',
         ]);
 
-        $allergies = !empty($validated['allergies'])
+        $allergies = ! empty($validated['allergies'])
             ? array_map('trim', explode(',', $validated['allergies']))
             : [];
 

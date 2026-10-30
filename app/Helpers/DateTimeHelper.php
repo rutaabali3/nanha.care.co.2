@@ -25,8 +25,8 @@ class DateTimeHelper
             'overdue' => $hoursElapsed > $hours,
             'hours_elapsed' => $hoursElapsed,
             'label' => $hoursElapsed > $hours
-                ? 'Overdue by ' . ($hoursElapsed - $hours) . ' hours'
-                : ($hours - $hoursElapsed) . ' hours remaining',
+                ? 'Overdue by '.($hoursElapsed - $hours).' hours'
+                : ($hours - $hoursElapsed).' hours remaining',
         ];
     }
 
@@ -37,9 +37,9 @@ class DateTimeHelper
         $months = (int) $dob->copy()->addYears($years)->diffInMonths($now);
 
         if ($years > 0) {
-            return $years . ' year' . ($years > 1 ? 's' : '');
+            return $years.' year'.($years > 1 ? 's' : '');
         }
 
-        return $months . ' month' . ($months > 1 ? 's' : '');
+        return $months.' month'.($months > 1 ? 's' : '');
     }
 }

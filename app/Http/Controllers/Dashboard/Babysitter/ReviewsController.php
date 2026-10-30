@@ -13,6 +13,7 @@ class ReviewsController
         $reviews = BabysitterReview::where('babysitter_id', auth()->id())
             ->orderByDesc('created_at')
             ->paginate(10);
+
         return view('dashboard.babysitter.reviews.index', compact('reviews'));
     }
 

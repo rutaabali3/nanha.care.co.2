@@ -13,6 +13,7 @@ class DashboardController
     public function index()
     {
         $data = $this->service->getBabysitterOverview(auth()->id());
+
         return view('dashboard.babysitter.index', $data);
     }
 }

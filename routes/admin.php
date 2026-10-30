@@ -1,14 +1,14 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Dashboard\Admin\AnnouncementsController;
 use App\Http\Controllers\Dashboard\Admin\DashboardController;
-use App\Http\Controllers\Dashboard\Admin\UsersController;
-use App\Http\Controllers\Dashboard\Admin\RolesController;
 use App\Http\Controllers\Dashboard\Admin\ModerationController;
 use App\Http\Controllers\Dashboard\Admin\ReportsController;
-use App\Http\Controllers\Dashboard\Admin\SettingsController;
 use App\Http\Controllers\Dashboard\Admin\RevenueController;
-use App\Http\Controllers\Dashboard\Admin\AnnouncementsController;
+use App\Http\Controllers\Dashboard\Admin\RolesController;
+use App\Http\Controllers\Dashboard\Admin\SettingsController;
+use App\Http\Controllers\Dashboard\Admin\UsersController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('/dashboard/admin')->middleware(['auth', 'role:admin'])->group(function () {
 

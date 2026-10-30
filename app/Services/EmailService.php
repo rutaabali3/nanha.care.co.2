@@ -37,7 +37,7 @@ class EmailService implements IEmailService
 
     public function sendPasswordReset(string $email, string $token): void
     {
-        Mail::raw('Your password reset token: ' . $token, function ($message) use ($email) {
+        Mail::raw('Your password reset token: '.$token, function ($message) use ($email) {
             $message->to($email)->subject('Password Reset');
         });
     }

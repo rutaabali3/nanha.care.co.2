@@ -1,12 +1,12 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Dashboard\ShopOwner\DashboardController;
-use App\Http\Controllers\Dashboard\ShopOwner\ProductsController;
-use App\Http\Controllers\Dashboard\ShopOwner\OrdersController;
 use App\Http\Controllers\Dashboard\ShopOwner\EarningsController;
+use App\Http\Controllers\Dashboard\ShopOwner\OrdersController;
+use App\Http\Controllers\Dashboard\ShopOwner\ProductsController;
 use App\Http\Controllers\Dashboard\ShopOwner\ProfileController;
 use App\Http\Controllers\Dashboard\ShopOwner\ReviewsController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('/dashboard/shop-owner')->middleware(['auth', 'role:shop_owner', 'onboarded'])->group(function () {
 

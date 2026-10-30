@@ -15,6 +15,7 @@ class ProfileController
     public function index()
     {
         $profile = DoctorProfile::where('user_id', auth()->id())->first();
+
         return view('dashboard.doctor.profile.index', compact('profile'));
     }
 

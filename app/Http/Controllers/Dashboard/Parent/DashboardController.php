@@ -13,6 +13,7 @@ class DashboardController
     public function index()
     {
         $data = $this->service->getParentOverview(auth()->id());
+
         return view('dashboard.parent.index', $data);
     }
 }

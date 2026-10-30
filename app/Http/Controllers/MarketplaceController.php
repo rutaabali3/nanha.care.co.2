@@ -26,7 +26,7 @@ class MarketplaceController extends Controller
     {
         $product = $this->marketplaceService->getProductById((int) $id);
 
-        abort_if(!$product || $product->status !== ContentStatus::Published, 404);
+        abort_if(! $product || $product->status !== ContentStatus::Published, 404);
 
         $related = $this->marketplaceService->getRelatedProducts((int) $id);
 
